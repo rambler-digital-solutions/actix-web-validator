@@ -1,13 +1,12 @@
-# actix-web-validator
+# actix-web-validator [![Latest Version]][crates.io] [![Documentation]][docs-rs] 
 
+[Latest Version]: https://img.shields.io/crates/v/actix-web-validator
+[Documentation]: https://docs.rs/actix-web-validator/badge.svg
+[docs-rs]: https://docs.rs/actix-web-validator/
+[crates.io]: https://crates.io/crates/actix-web-validator
 
 This crate is a Rust library for providing validation mechanism to actix-web with Validator crate
 
-[rust-url]: https://github.com/servo/rust-url
-[Serde]: https://github.com/serde-rs/serde
-[urlencoded]: https://github.com/nox/serde_urlencoded
-[qs]: https://www.npmjs.com/package/qs
-[Rake]: http://www.rubydoc.info/github/rack/rack/Rack/Utils#parse_nested_query-class_method
 
 Installation
 ============
@@ -19,8 +18,6 @@ This crate works with Cargo and can be found on
 [dependencies]
 actix-web-validator = "0.1.0"
 ```
-
-[crates.io]: https://crates.io/crates/actix-web-validator
 
 ## License
 
