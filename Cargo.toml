@@ -1,12 +1,11 @@
 [package]
 name = "actix-web-validator"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Kolomatskiy Artem <kolomatskiy@bk.ru>"]
 edition = "2018"
 description = "Validation mechanism for actix-web"
 keywords = ["actix-web", "serialization", "querystring", "validator", "validation"]
 categories = ["encoding", "web-programming"]
-license-file = "LICENSE"
 license = "MIT"
 repository = "https://github.com/rambler-digital-solutions/actix-web-validator"
 
