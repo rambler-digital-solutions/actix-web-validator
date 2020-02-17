@@ -1,16 +1,15 @@
 use actix_http::error::ResponseError;
+use actix_web::http::StatusCode;
 use actix_web::{FromRequest, HttpRequest, HttpResponse};
 use core::fmt::Debug;
 use derive_more::Display;
-use actix_web::http::StatusCode;
 use serde::de;
 use std::sync::Arc;
 use validator::Validate;
 
 #[derive(Clone)]
 pub struct QueryConfig {
-    pub ehandler:
-        Option<Arc<dyn Fn(Error, &HttpRequest) -> actix_web::Error + Send + Sync>>,
+    pub ehandler: Option<Arc<dyn Fn(Error, &HttpRequest) -> actix_web::Error + Send + Sync>>,
 }
 
 impl QueryConfig {
@@ -80,12 +79,13 @@ where
         serde_urlencoded::from_str::<T>(req.query_string())
             .map_err(Error::Deserialize)
             .and_then(|value| {
-                value.validate()
+                value
+                    .validate()
                     .map(move |_| value)
                     .map_err(Error::Validate)
             })
             .map(ValidatedQuery)
-            .map_err( move |e| {
+            .map_err(move |e| {
                 log::debug!(
                     "Failed during Query extractor validation. \
                      Request path: {:?}",
