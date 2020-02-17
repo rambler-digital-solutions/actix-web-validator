@@ -1,10 +1,10 @@
 [package]
 name = "actix-web-validator"
 version = "0.1.0"
-authors = ["Kolomatskiy Artem <a.kolomatskiy@rambler-co.ru>"]
+authors = ["Kolomatskiy Artem <kolomatskiy@bk.ru>"]
 edition = "2018"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+description = "Validation mechanism for actix-web"
+license-file = "LICENSE"
 
 [dependencies]
 actix-web = "1.0"
