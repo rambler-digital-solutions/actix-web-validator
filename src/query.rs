@@ -47,6 +47,12 @@ impl ResponseError for Error {
 #[derive(PartialEq, Eq, PartialOrd, Ord)]
 pub struct ValidatedQuery<T>(pub T);
 
+impl<T> AsRef<T> for ValidatedQuery<T> {
+    fn as_ref(&self) -> &T {
+        &self.0
+    }
+}
+
 impl<T> ValidatedQuery<T>
 where
     T: Validate,
