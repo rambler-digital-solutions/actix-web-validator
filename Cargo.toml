@@ -10,11 +10,15 @@ license = "MIT"
 repository = "https://github.com/rambler-digital-solutions/actix-web-validator"
 
 [dependencies]
-actix-web = "1.0"
+actix-web = "1"
 derive_more = "0.99"
-actix-http = "0.2.11"
+actix-http = "0.2"
 validator = "0.10"
 validator_derive = "0.10"
-serde = "1.0.104"
-serde_urlencoded = "0.6.1"
-log = "0.4.8"
+serde = "1"
+serde_urlencoded = "0.6"
+log = "0.4"
+
+[dev-dependencies]
+actix-service = "0.4"
+serde_derive = "1"

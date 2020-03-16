@@ -1,10 +1,11 @@
+use core::fmt::Debug;
+use std::sync::Arc;
+
 use actix_http::error::ResponseError;
 use actix_web::http::StatusCode;
 use actix_web::{FromRequest, HttpRequest, HttpResponse};
-use core::fmt::Debug;
 use derive_more::Display;
 use serde::de;
-use std::sync::Arc;
 use validator::Validate;
 
 #[derive(Clone)]
