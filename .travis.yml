@@ -5,7 +5,6 @@ services:
 
 rust:
   - stable
-  - beta
   - nightly
 
 jobs:
