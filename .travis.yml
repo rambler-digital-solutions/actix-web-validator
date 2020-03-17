@@ -22,5 +22,5 @@ after_success:
       if [[ "$TRAVIS_RUST_VERSION" == "stable" ]]; then
           cargo install cargo-tarpaulin
           echo "Uploaded code coverage"
-          cargo tarpaulin --out Xml --ciserver travis-ci --coveralls $TRAVIS_JOB_ID
+          cargo tarpaulin --ignore-tests --out Xml --ciserver travis-ci --coveralls $TRAVIS_JOB_ID
       fi
