@@ -1,5 +1,5 @@
 use actix_service::Service;
-use actix_web::{test, web, HttpResponse, http::StatusCode, App};
+use actix_web::{test, web, HttpResponse, http::StatusCode, App, error};
 use actix_web_validator::ValidatedQuery;
 use validator::Validate;
 use validator_derive::Validate;
@@ -31,4 +31,21 @@ fn test_query_validation() {
     let req = test::TestRequest::with_uri("/test?id=28").to_request();
     let resp = test::block_on(app.call(req)).unwrap();
     assert_eq!(resp.status(), StatusCode::OK);
+}
+
+#[test]
+fn test_custom_validation_error() {
+    let mut app = test::init_service(
+        App::new()
+            .data(actix_web_validator::QueryConfig::default()
+                .error_handler(|err, _req| {
+                    error::InternalError::from_response(
+                        err, HttpResponse::Conflict().finish()).into()
+                }))
+            .service(web::resource("/test").to(test_handler))
+    );
+
+    let req = test::TestRequest::with_uri("/test?id=42").to_request();
+    let resp = test::block_on(app.call(req)).unwrap();
+    assert_eq!(resp.status(), StatusCode::CONFLICT);
 }
