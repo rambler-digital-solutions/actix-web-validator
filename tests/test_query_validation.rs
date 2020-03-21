@@ -51,6 +51,21 @@ fn test_custom_validation_error() {
 }
 
 #[test]
+fn test_deref_validated_query() {
+    let mut app = test::init_service(
+        App::new()
+            .service(web::resource("/test")
+                .to(|query: ValidatedQuery<QueryParams>| {
+                    assert_eq!(query.id, 28);
+                    HttpResponse::Ok().finish()
+                })
+            ));
+
+    let req = test::TestRequest::with_uri("/test?id=28").to_request();
+    test::block_on(app.call(req)).unwrap();
+}
+
+#[test]
 fn test_query_implementation() {
     fn test_handler(query: ValidatedQuery<QueryParams>) -> HttpResponse {
         let reference = QueryParams { id: 28 };
