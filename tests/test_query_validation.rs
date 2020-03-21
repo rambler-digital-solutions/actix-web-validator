@@ -49,3 +49,18 @@ fn test_custom_validation_error() {
     let resp = test::block_on(app.call(req)).unwrap();
     assert_eq!(resp.status(), StatusCode::CONFLICT);
 }
+
+#[test]
+fn test_deref_validated_query() {
+    let mut app = test::init_service(
+        App::new()
+            .service(web::resource("/test")
+                .to(|query: ValidatedQuery<QueryParams>| {
+                    assert_eq!(query.id, 28);
+                    HttpResponse::Ok().finish()
+                })
+            ));
+
+    let req = test::TestRequest::with_uri("/test?id=28").to_request();
+    test::block_on(app.call(req)).unwrap();
+}

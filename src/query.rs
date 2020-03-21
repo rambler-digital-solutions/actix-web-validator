@@ -7,6 +7,7 @@ use actix_web::{FromRequest, HttpRequest, HttpResponse};
 use derive_more::Display;
 use serde::de;
 use validator::Validate;
+use std::ops::Deref;
 
 #[derive(Clone)]
 pub struct QueryConfig {
@@ -54,11 +55,19 @@ impl<T> AsRef<T> for ValidatedQuery<T> {
     }
 }
 
+impl<T> Deref for ValidatedQuery<T> {
+    type Target = T;
+
+    fn deref(&self) -> &T {
+        &self.0
+    }
+}
+
 impl<T> ValidatedQuery<T>
 where
     T: Validate,
 {
-    /// Deconstruct to a inner value
+    /// Deconstruct to an inner value
     pub fn into_inner(self) -> T {
         self.0
     }
