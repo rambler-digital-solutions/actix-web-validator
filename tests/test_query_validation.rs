@@ -64,6 +64,7 @@ fn test_deref_validated_query() {
     let req = test::TestRequest::with_uri("/test?id=28").to_request();
     test::block_on(app.call(req)).unwrap();
 }
+
 #[test]
 fn test_query_implementation() {
     fn test_handler(query: ValidatedQuery<QueryParams>) -> HttpResponse {
