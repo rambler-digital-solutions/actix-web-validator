@@ -1,8 +1,9 @@
 use actix_service::Service;
-use actix_web::{test, web, HttpResponse, http::StatusCode, App, error};
+use actix_web::{test, web, HttpResponse, http::StatusCode, App};
 use validator::Validate;
 use validator_derive::Validate;
 use serde_derive::{Deserialize, Serialize};
+use actix_web_validator::ValidatedJson;
 
 #[derive(Debug, Validate, Serialize, Deserialize)]
 struct JsonData {
@@ -12,7 +13,7 @@ struct JsonData {
    age: u8,
 }
 
-fn test_handler(_query: web::Json<JsonData>) -> HttpResponse {
+fn test_handler(_query: ValidatedJson<JsonData>) -> HttpResponse {
     HttpResponse::Ok().finish()
 }
 
