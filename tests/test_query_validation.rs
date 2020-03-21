@@ -5,7 +5,7 @@ use validator::Validate;
 use validator_derive::Validate;
 use serde_derive::Deserialize;
 
-#[derive(Debug, Validate, Deserialize)]
+#[derive(Debug, Validate, Deserialize, PartialEq)]
 struct QueryParams {
     #[validate(range(min = 8, max = 28))]
     id: u8,
@@ -63,4 +63,21 @@ fn test_deref_validated_query() {
 
     let req = test::TestRequest::with_uri("/test?id=28").to_request();
     test::block_on(app.call(req)).unwrap();
+}
+#[test]
+fn test_query_implementation() {
+    fn test_handler(query: ValidatedQuery<QueryParams>) -> HttpResponse {
+        let reference = QueryParams { id: 28 };
+        assert_eq!(query.as_ref(), &reference);
+        assert_eq!(query.into_inner(), reference);
+        HttpResponse::Ok().finish()
+    }
+
+    let mut app = test::init_service(
+        App::new()
+            .service(web::resource("/test").to(test_handler))
+    );
+    let req = test::TestRequest::with_uri("/test?id=28").to_request();
+    let resp = test::block_on(app.call(req)).unwrap();
+    assert_eq!(resp.status(), StatusCode::OK);
 }

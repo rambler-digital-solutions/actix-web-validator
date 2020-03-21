@@ -21,7 +21,7 @@ This crate works with Cargo and can be found on
 
 ```toml
 [dependencies]
-actix-web-validator = "0.1.0"
+actix-web-validator = "0.1"
 ```
 
 ## License
