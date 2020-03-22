@@ -1,3 +1,4 @@
+//! Query extractor/responder
 use core::fmt::Debug;
 use std::sync::Arc;
 use crate::error::Error;

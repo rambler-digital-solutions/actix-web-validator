@@ -6,7 +6,6 @@ use std::sync::Arc;
 use actix_http::{Payload, Response};
 use actix_http::http::StatusCode;
 use actix_web::dev::JsonBody;
-use actix_web::error::JsonPayloadError;
 use actix_web::FromRequest;
 use actix_web::HttpRequest;
 use actix_web::Responder;
@@ -77,13 +76,13 @@ where
         Box::new(
             JsonBody::new(req, payload, ctype)
                 .limit(limit)
-                .map(|value: T| {
+                .map_err(Error::from)
+                .and_then(|value: T| {
                     value
-                        // .validate()
-                        // .map(move |_| value)
-                        // .map_err(Error::Validate)
+                        .validate()
+                        .map(|_| ValidatedJson(value))
+                        .map_err(Error::from)
                 })
-                .map(ValidatedJson)
                 .map_err(move |e| {
                     log::debug!(
                         "Failed to deserialize Json from payload. \
@@ -93,7 +92,7 @@ where
                     if let Some(err) = err {
                         (*err)(e, &req2)
                     } else {
-                        e.into()
+                        e
                     }
                 })
         )
@@ -103,7 +102,7 @@ where
 #[derive(Clone)]
 pub struct JsonConfig {
     limit: usize,
-    ehandler: Option<Arc<dyn Fn(JsonPayloadError, &HttpRequest) -> Error + Send + Sync>>,
+    ehandler: Option<Arc<dyn Fn(Error, &HttpRequest) -> Error + Send + Sync>>,
     content_type: Option<Arc<dyn Fn(mime::Mime) -> bool + Send + Sync>>,
 }
 
@@ -117,7 +116,7 @@ impl JsonConfig {
     /// Set custom error handler
     pub fn error_handler<F>(mut self, f: F) -> Self
     where
-        F: Fn(JsonPayloadError, &HttpRequest) -> Error + Send + Sync + 'static,
+        F: Fn(Error, &HttpRequest) -> Error + Send + Sync + 'static,
     {
         self.ehandler = Some(Arc::new(f));
         self

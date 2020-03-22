@@ -27,6 +27,12 @@ impl From<actix_web::error::JsonPayloadError> for Error {
     }
 }
 
+impl From<validator::ValidationErrors> for Error {
+    fn from(error: validator::ValidationErrors) -> Self {
+        Error::Validate(error)
+    }
+}
+
 impl ResponseError for Error {
     fn error_response(&self) -> HttpResponse {
         HttpResponse::new(StatusCode::BAD_REQUEST)
