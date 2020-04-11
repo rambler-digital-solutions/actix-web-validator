@@ -45,12 +45,18 @@ fn test_json_validation() {
 fn test_custom_validation_error() {
     let mut app = test::init_service(
         App::new()
-        .data(actix_web_validator::JsonConfig::default()
-            .error_handler(|err, _req| {
-                error::InternalError::from_response(
-                    err, HttpResponse::Conflict().finish()).into()
-            }))
-        .service(web::resource("/test").to(test_handler))
+            .service(
+                web::resource("/test")
+                    .data(
+                        actix_web_validator::JsonConfig::default()
+                            .error_handler(|err, _req| {
+                                error::InternalError::from_response(
+                                    err, HttpResponse::Conflict().finish()
+                                ).into()
+                            })
+                    )
+                    .route(web::post().to(test_handler))
+            )
     );
 
     let req = test::TestRequest::post()
