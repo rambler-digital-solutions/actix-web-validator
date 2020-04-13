@@ -7,17 +7,29 @@ use derive_more::Display;
 pub enum Error {
     #[display(fmt = "Query validate error: {}", _0)]
     Validate(validator::ValidationErrors),
+    #[display(fmt = "Query validate error: {}", _0)]
+    Deserialize(DeserializeErrors),
+    #[display(fmt = "Payload error: {}", _0)]
+    JsonPayloadError(actix_web::error::JsonPayloadError),
+}
+
+#[derive(Display, Debug)]
+pub enum DeserializeErrors {
     #[display(fmt = "Query deserialize error: {}", _0)]
-    Deserialize(serde_urlencoded::de::Error),
+    DeserializeQuery(serde_urlencoded::de::Error),
     #[display(fmt = "Json deserialize error: {}", _0)]
     DeserializeJson(serde_json::error::Error),
-    #[display(fmt = "Query deserialize error: {}", _0)]
-    JsonPayloadError(actix_web::error::JsonPayloadError),
 }
 
 impl From<serde_json::error::Error> for Error {
     fn from(error: serde_json::error::Error) -> Self {
-        Error::DeserializeJson(error)
+        Error::Deserialize(DeserializeErrors::DeserializeJson(error))
+    }
+}
+
+impl From<serde_urlencoded::de::Error> for Error {
+    fn from(error: serde_urlencoded::de::Error) -> Self {
+        Error::Deserialize(DeserializeErrors::DeserializeQuery(error))
     }
 }
 

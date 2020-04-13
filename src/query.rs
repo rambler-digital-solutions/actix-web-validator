@@ -78,7 +78,7 @@ where
             .unwrap_or(None);
 
         serde_urlencoded::from_str::<T>(req.query_string())
-            .map_err(Error::Deserialize)
+            .map_err(Error::from)
             .and_then(|value| {
                 value
                     .validate()
