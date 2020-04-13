@@ -3,16 +3,12 @@ use core::fmt::Debug;
 use std::ops::Deref;
 use std::sync::Arc;
 
-use actix_http::{Payload, Response};
-use actix_http::http::StatusCode;
+use actix_http::Payload;
 use actix_web::dev::JsonBody;
 use actix_web::FromRequest;
 use actix_web::HttpRequest;
-use actix_web::Responder;
 use futures::Future;
 use serde::de::DeserializeOwned;
-use serde::Serialize;
-use serde_json;
 use validator::Validate;
 
 use crate::error::Error;
@@ -41,28 +37,12 @@ impl<T> Deref for ValidatedJson<T> {
     }
 }
 
-impl<T: Serialize> Responder for ValidatedJson<T> {
-    type Error = Error;
-    type Future = Result<Response, Error>;
-
-    fn respond_to(self, _: &HttpRequest) -> Self::Future {
-        let body = match serde_json::to_string(&self.0) {
-            Ok(body) => body,
-            Err(e) => return Err(e.into()),
-        };
-
-        Ok(Response::build(StatusCode::OK)
-            .content_type("application/json")
-            .body(body))
-    }
-}
-
 impl<T> FromRequest for ValidatedJson<T>
 where
     T: DeserializeOwned + Validate + Debug + 'static,
 {
-    type Error = Error;
-    type Future = Box<dyn Future<Item = Self, Error = Error>>;
+    type Error = actix_web::Error;
+    type Future = Box<dyn Future<Item = Self, Error = Self::Error>>;
     type Config = JsonConfig;
 
     #[inline]
@@ -92,7 +72,7 @@ where
                     if let Some(err) = err {
                         (*err)(e, &req2)
                     } else {
-                        e
+                        e.into()
                     }
                 })
         )
@@ -102,7 +82,7 @@ where
 #[derive(Clone)]
 pub struct JsonConfig {
     limit: usize,
-    ehandler: Option<Arc<dyn Fn(Error, &HttpRequest) -> Error + Send + Sync>>,
+    ehandler: Option<Arc<dyn Fn(Error, &HttpRequest) -> actix_web::Error + Send + Sync>>,
     content_type: Option<Arc<dyn Fn(mime::Mime) -> bool + Send + Sync>>,
 }
 
@@ -116,7 +96,7 @@ impl JsonConfig {
     /// Set custom error handler
     pub fn error_handler<F>(mut self, f: F) -> Self
     where
-        F: Fn(Error, &HttpRequest) -> Error + Send + Sync + 'static,
+        F: Fn(Error, &HttpRequest) -> actix_web::Error + Send + Sync + 'static,
     {
         self.ehandler = Some(Arc::new(f));
         self
