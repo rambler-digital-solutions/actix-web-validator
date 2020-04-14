@@ -66,3 +66,60 @@ fn test_custom_validation_error() {
     let resp = test::block_on(app.call(req)).unwrap();
     assert_eq!(resp.status(), StatusCode::CONFLICT);
 }
+
+#[test]
+fn test_validated_json_deref() {
+    let mut app = test::init_service(
+        App::new()
+            .service(web::resource("/test")
+                .to(|payload: ValidatedJson<JsonPayload>| {
+                    assert_eq!(payload.age, 24);
+                    HttpResponse::Ok().finish()
+                })
+            ));
+
+    let req = test::TestRequest::post()
+        .uri("/test")
+        .set_json(&JsonPayload { page_url: "https://my_page.com".to_owned(), age: 24 })
+        .to_request();
+    test::block_on(app.call(req)).unwrap();
+}
+
+#[test]
+fn test_validated_json_into_inner() {
+    let mut app = test::init_service(
+        App::new()
+            .service(web::resource("/test")
+                .to(|payload: ValidatedJson<JsonPayload>| {
+                    let payload = payload.into_inner();
+                    assert_eq!(payload.age, 24);
+                    assert_eq!(payload.page_url, "https://my_page.com");
+                    HttpResponse::Ok().finish()
+                })
+            ));
+
+    let req = test::TestRequest::post()
+        .uri("/test")
+        .set_json(&JsonPayload { page_url: "https://my_page.com".to_owned(), age: 24 })
+        .to_request();
+    test::block_on(app.call(req)).unwrap();
+}
+
+#[test]
+fn test_validated_json_limit() {
+    let mut app = test::init_service(
+        App::new()
+            .service(
+                web::resource("/test")
+                    .data(actix_web_validator::JsonConfig::default().limit(1))
+                    .route(web::post().to(test_handler))
+            )
+    );
+
+    let req = test::TestRequest::post()
+        .uri("/test")
+        .set_json(&JsonPayload { page_url: "https://my_page.com".to_owned(), age: 24 })
+        .to_request();
+    let resp = test::block_on(app.call(req)).unwrap();
+    assert_eq!(resp.status(), StatusCode::BAD_REQUEST);
+}
