@@ -1,10 +1,9 @@
+//! Query extractor/responder
 use core::fmt::Debug;
 use std::sync::Arc;
+use crate::error::Error;
 
-use actix_http::error::ResponseError;
-use actix_web::http::StatusCode;
-use actix_web::{FromRequest, HttpRequest, HttpResponse};
-use derive_more::Display;
+use actix_web::{FromRequest, HttpRequest};
 use serde::de;
 use validator::Validate;
 use std::ops::Deref;
@@ -28,20 +27,6 @@ impl QueryConfig {
 impl Default for QueryConfig {
     fn default() -> Self {
         QueryConfig { ehandler: None }
-    }
-}
-
-#[derive(Display, Debug, Clone)]
-pub enum Error {
-    #[display(fmt = "Query validate error: {}", _0)]
-    Validate(validator::ValidationErrors),
-    #[display(fmt = "Query deserialize error: {}", _0)]
-    Deserialize(serde_urlencoded::de::Error),
-}
-
-impl ResponseError for Error {
-    fn error_response(&self) -> HttpResponse {
-        HttpResponse::new(StatusCode::BAD_REQUEST)
     }
 }
 
@@ -93,7 +78,7 @@ where
             .unwrap_or(None);
 
         serde_urlencoded::from_str::<T>(req.query_string())
-            .map_err(Error::Deserialize)
+            .map_err(Error::from)
             .and_then(|value| {
                 value
                     .validate()
