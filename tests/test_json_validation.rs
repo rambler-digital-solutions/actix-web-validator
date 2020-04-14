@@ -5,7 +5,7 @@ use validator_derive::Validate;
 use serde_derive::{Deserialize, Serialize};
 use actix_web_validator::ValidatedJson;
 
-#[derive(Debug, Validate, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Validate, Serialize, Deserialize)]
 struct JsonPayload {
    #[validate(url)]
    page_url: String,
@@ -68,12 +68,17 @@ fn test_custom_validation_error() {
 }
 
 #[test]
-fn test_validated_json_deref() {
+fn test_validated_json_asref_deref() {
     let mut app = test::init_service(
         App::new()
             .service(web::resource("/test")
                 .to(|payload: ValidatedJson<JsonPayload>| {
                     assert_eq!(payload.age, 24);
+                    let reference = JsonPayload {
+                        page_url: "https://my_page.com".to_owned(),
+                        age: 24
+                    };
+                    assert_eq!(payload.as_ref(), &reference);
                     HttpResponse::Ok().finish()
                 })
             ));
