@@ -19,6 +19,8 @@ pub enum DeserializeErrors {
     DeserializeQuery(serde_urlencoded::de::Error),
     #[display(fmt = "Json deserialize error: {}", _0)]
     DeserializeJson(serde_json::error::Error),
+    #[display(fmt = "Path deserialize error: {}", _0)]
+    DeserializePath(serde::de::value::Error),
 }
 
 impl From<serde_json::error::Error> for Error {
@@ -27,9 +29,9 @@ impl From<serde_json::error::Error> for Error {
     }
 }
 
-impl From<serde_urlencoded::de::Error> for Error {
-    fn from(error: serde_urlencoded::de::Error) -> Self {
-        Error::Deserialize(DeserializeErrors::DeserializeQuery(error))
+impl From<serde::de::value::Error> for Error {
+    fn from(error: serde::de::value::Error) -> Self {
+        Error::Deserialize(DeserializeErrors::DeserializePath(error))
     }
 }
 
