@@ -1,6 +1,6 @@
 use actix_web;
-use actix_web::{HttpResponse, ResponseError};
 use actix_web::http::StatusCode;
+use actix_web::{HttpResponse, ResponseError};
 use derive_more::Display;
 
 #[derive(Display, Debug)]
@@ -19,6 +19,8 @@ pub enum DeserializeErrors {
     DeserializeQuery(serde_urlencoded::de::Error),
     #[display(fmt = "Json deserialize error: {}", _0)]
     DeserializeJson(serde_json::error::Error),
+    #[display(fmt = "Path deserialize error: {}", _0)]
+    DeserializePath(serde::de::value::Error),
 }
 
 impl From<serde_json::error::Error> for Error {
