@@ -1,9 +1,9 @@
 use actix_service::Service;
-use actix_web::{test, web, HttpResponse, http::StatusCode, App, error};
+use actix_web::{error, http::StatusCode, test, web, App, HttpResponse};
 use actix_web_validator::ValidatedQuery;
+use serde_derive::Deserialize;
 use validator::Validate;
 use validator_derive::Validate;
-use serde_derive::Deserialize;
 
 #[derive(Debug, Validate, Deserialize, PartialEq)]
 struct QueryParams {
@@ -17,10 +17,7 @@ fn test_handler(_query: ValidatedQuery<QueryParams>) -> HttpResponse {
 
 #[test]
 fn test_query_validation() {
-    let mut app = test::init_service(
-        App::new()
-            .service(web::resource("/test").to(test_handler))
-    );
+    let mut app = test::init_service(App::new().service(web::resource("/test").to(test_handler)));
 
     // Test 400 status
     let req = test::TestRequest::with_uri("/test?id=42").to_request();
@@ -37,12 +34,13 @@ fn test_query_validation() {
 fn test_custom_validation_error() {
     let mut app = test::init_service(
         App::new()
-            .data(actix_web_validator::QueryConfig::default()
-                .error_handler(|err, _req| {
-                    error::InternalError::from_response(
-                        err, HttpResponse::Conflict().finish()).into()
-                }))
-            .service(web::resource("/test").to(test_handler))
+            .data(
+                actix_web_validator::QueryConfig::default().error_handler(|err, _req| {
+                    error::InternalError::from_response(err, HttpResponse::Conflict().finish())
+                        .into()
+                }),
+            )
+            .service(web::resource("/test").to(test_handler)),
     );
 
     let req = test::TestRequest::with_uri("/test?id=42").to_request();
@@ -52,14 +50,12 @@ fn test_custom_validation_error() {
 
 #[test]
 fn test_deref_validated_query() {
-    let mut app = test::init_service(
-        App::new()
-            .service(web::resource("/test")
-                .to(|query: ValidatedQuery<QueryParams>| {
-                    assert_eq!(query.id, 28);
-                    HttpResponse::Ok().finish()
-                })
-            ));
+    let mut app = test::init_service(App::new().service(web::resource("/test").to(
+        |query: ValidatedQuery<QueryParams>| {
+            assert_eq!(query.id, 28);
+            HttpResponse::Ok().finish()
+        },
+    )));
 
     let req = test::TestRequest::with_uri("/test?id=28").to_request();
     test::block_on(app.call(req)).unwrap();
@@ -74,10 +70,7 @@ fn test_query_implementation() {
         HttpResponse::Ok().finish()
     }
 
-    let mut app = test::init_service(
-        App::new()
-            .service(web::resource("/test").to(test_handler))
-    );
+    let mut app = test::init_service(App::new().service(web::resource("/test").to(test_handler)));
     let req = test::TestRequest::with_uri("/test?id=28").to_request();
     let resp = test::block_on(app.call(req)).unwrap();
     assert_eq!(resp.status(), StatusCode::OK);

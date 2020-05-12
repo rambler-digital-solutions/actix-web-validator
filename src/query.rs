@@ -1,12 +1,12 @@
 //! Query extractor/responder
+use crate::error::Error;
 use core::fmt::Debug;
 use std::sync::Arc;
-use crate::error::Error;
 
 use actix_web::{FromRequest, HttpRequest};
 use serde::de;
-use validator::Validate;
 use std::ops::Deref;
+use validator::Validate;
 
 #[derive(Clone)]
 pub struct QueryConfig {

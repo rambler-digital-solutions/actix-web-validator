@@ -74,7 +74,7 @@ where
                     } else {
                         e.into()
                     }
-                })
+                }),
         )
     }
 }

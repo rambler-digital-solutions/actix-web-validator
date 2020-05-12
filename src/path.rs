@@ -1,14 +1,14 @@
-use std::ops::Deref;
 use std::fmt;
+use std::ops::Deref;
 use std::sync::Arc;
 
-use actix_web::{FromRequest, HttpRequest};
-use actix_web::dev::Payload;
 use actix_router::PathDeserializer;
+use actix_web::dev::Payload;
+use actix_web::{FromRequest, HttpRequest};
+use serde::de::{Deserialize, DeserializeOwned};
 use validator::Validate;
-use serde::de::{DeserializeOwned, Deserialize};
 
-use crate::error::{Error, DeserializeErrors};
+use crate::error::{DeserializeErrors, Error};
 
 #[derive(PartialEq, Eq, PartialOrd, Ord)]
 pub struct ValidatedPath<T> {
@@ -212,8 +212,6 @@ impl PathConfig {
 
 impl Default for PathConfig {
     fn default() -> Self {
-        Self {
-            ehandler: None,
-        }
+        Self { ehandler: None }
     }
 }
