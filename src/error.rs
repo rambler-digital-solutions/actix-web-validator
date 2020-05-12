@@ -29,9 +29,9 @@ impl From<serde_json::error::Error> for Error {
     }
 }
 
-impl From<serde::de::value::Error> for Error {
-    fn from(error: serde::de::value::Error) -> Self {
-        Error::Deserialize(DeserializeErrors::DeserializePath(error))
+impl From<serde_urlencoded::de::Error> for Error {
+    fn from(error: serde_urlencoded::de::Error) -> Self {
+        Error::Deserialize(DeserializeErrors::DeserializeQuery(error))
     }
 }
 
