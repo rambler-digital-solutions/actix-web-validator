@@ -92,20 +92,3 @@ fn test_path_implementation() {
     let resp = test::block_on(app.call(req)).unwrap();
     assert_eq!(resp.status(), StatusCode::OK);
 }
-
-// #[test]
-// fn test_errors() {
-    // let mut app = test::init_service(
-        // App::new()
-            // .data(actix_web_validator::PathConfig::default()
-                // .error_handler(|err, _req| {
-                    // error::InternalError::from_response(
-                        // err, HttpResponse::Conflict().finish()).into()
-                // }))
-            // .service(web::resource("/test/{id}/").to(test_handler))
-    // );
-
-    // let req = test::TestRequest::with_uri("/test/42/").to_request();
-    // let resp = test::block_on(app.call(req)).unwrap();
-    // assert_eq!(resp.status(), StatusCode::CONFLICT);
-// }
