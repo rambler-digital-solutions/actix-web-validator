@@ -1,3 +1,5 @@
+use std::fmt;
+
 use actix_service::Service;
 use actix_web::{test, web, HttpResponse, http::StatusCode, App, error};
 use actix_web_validator::ValidatedPath;
@@ -9,6 +11,12 @@ use serde_derive::Deserialize;
 struct PathParams {
     #[validate(range(min = 8, max = 28))]
     id: u8,
+}
+
+impl fmt::Display for PathParams {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{{ id: {} }}", self.id)
+    }
 }
 
 fn test_handler(_query: ValidatedPath<PathParams>) -> HttpResponse {
@@ -66,9 +74,11 @@ fn test_deref_validated_path() {
 }
 
 #[test]
-fn test_query_implementation() {
+fn test_path_implementation() {
     fn test_handler(query: ValidatedPath<PathParams>) -> HttpResponse {
         let reference = PathParams { id: 28 };
+        assert_eq!(format!("{:?}", &reference), format!("{:?}", &query));
+        assert_eq!(format!("{}", &reference), format!("{}", &query));
         assert_eq!(query.as_ref(), &reference);
         assert_eq!(query.into_inner(), reference);
         HttpResponse::Ok().finish()
@@ -82,3 +92,20 @@ fn test_query_implementation() {
     let resp = test::block_on(app.call(req)).unwrap();
     assert_eq!(resp.status(), StatusCode::OK);
 }
+
+// #[test]
+// fn test_errors() {
+    // let mut app = test::init_service(
+        // App::new()
+            // .data(actix_web_validator::PathConfig::default()
+                // .error_handler(|err, _req| {
+                    // error::InternalError::from_response(
+                        // err, HttpResponse::Conflict().finish()).into()
+                // }))
+            // .service(web::resource("/test/{id}/").to(test_handler))
+    // );
+
+    // let req = test::TestRequest::with_uri("/test/42/").to_request();
+    // let resp = test::block_on(app.call(req)).unwrap();
+    // assert_eq!(resp.status(), StatusCode::CONFLICT);
+// }

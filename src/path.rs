@@ -10,10 +10,43 @@ use serde::de::{DeserializeOwned, Deserialize};
 
 use crate::error::{Error, DeserializeErrors};
 
+#[derive(PartialEq, Eq, PartialOrd, Ord)]
 pub struct ValidatedPath<T> {
     inner: T,
 }
 
+/// Extract typed information from the request's path.
+///
+/// ## Example
+///
+/// It is possible to extract path information to a specific type that
+/// implements `Deserialize` trait from *serde* and `Validate` trait from *validator*.
+///
+/// ```rust
+/// use actix_web::{web, App, Error};
+/// use serde_derive::Deserialize;
+/// use actix_web_validator::ValidatedPath;
+/// use validator::Validate;
+/// use validator_derive::Validate;
+///
+/// #[derive(Deserialize, Validate)]
+/// struct Info {
+///     #[validate(length(min = 1))]
+///     username: String,
+/// }
+///
+/// /// extract `Info` from a path using serde
+/// fn index(info: ValidatedPath<Info>) -> Result<String, Error> {
+///     Ok(format!("Welcome {}!", info.username))
+/// }
+///
+/// fn main() {
+///     let app = App::new().service(
+///         web::resource("/{username}/index.html") // <- define path parameters
+///              .route(web::get().to(index)) // <- use handler with Path` extractor
+///     );
+/// }
+/// ```
 impl<T> ValidatedPath<T> {
     /// Deconstruct to an inner value
     pub fn into_inner(self) -> T {
@@ -47,6 +80,38 @@ impl<T: fmt::Display> fmt::Display for ValidatedPath<T> {
     }
 }
 
+/// Extract typed information from the request's path.
+///
+/// ## Example
+///
+/// It is possible to extract path information to a specific type that
+/// implements `Deserialize` trait from *serde* and `Validate` trait from *validator*.
+///
+/// ```rust
+/// use actix_web::{web, App, Error};
+/// use serde_derive::Deserialize;
+/// use actix_web_validator::ValidatedPath;
+/// use validator::Validate;
+/// use validator_derive::Validate;
+///
+/// #[derive(Deserialize, Validate)]
+/// struct Info {
+///     #[validate(length(min = 1))]
+///     username: String,
+/// }
+///
+/// /// extract `Info` from a path using serde
+/// fn index(info: ValidatedPath<Info>) -> Result<String, Error> {
+///     Ok(format!("Welcome {}!", info.username))
+/// }
+///
+/// fn main() {
+///     let app = App::new().service(
+///         web::resource("/{username}/index.html") // <- define path parameters
+///              .route(web::get().to(index)) // <- use handler with Path` extractor
+///     );
+/// }
+/// ```
 impl<T> FromRequest for ValidatedPath<T>
 where
     T: DeserializeOwned + Validate,
@@ -86,6 +151,49 @@ where
     }
 }
 
+/// Path extractor configuration
+///
+/// ```rust
+/// use actix_web_validator::{PathConfig, ValidatedPath};
+/// use actix_web::{error, web, App, FromRequest, HttpResponse};
+/// use validator::Validate;
+/// use validator_derive::Validate;
+/// use serde_derive::Deserialize;
+///
+/// #[derive(Deserialize, Debug)]
+/// enum Folder {
+///     #[serde(rename = "inbox")]
+///     Inbox,
+///     #[serde(rename = "outbox")]
+///     Outbox,
+/// }
+///
+/// #[derive(Deserialize, Debug, Validate)]
+/// struct Filter {
+///     folder: Folder,
+///     #[validate(range(min = 1024))]
+///     id: u64,
+/// }
+///
+/// // deserialize `Info` from request's path
+/// fn index(folder: ValidatedPath<Filter>) -> String {
+///     format!("Selected folder: {:?}!", folder)
+/// }
+///
+/// fn main() {
+///     let app = App::new().service(
+///         web::resource("/messages/{folder}")
+///             .data(PathConfig::default().error_handler(|err, req| {
+///                 error::InternalError::from_response(
+///                     err,
+///                     HttpResponse::Conflict().finish(),
+///                 )
+///                 .into()
+///             }))
+///             .route(web::post().to(index)),
+///     );
+/// }
+/// ```
 #[derive(Clone)]
 pub struct PathConfig {
     ehandler: Option<Arc<dyn Fn(Error, &HttpRequest) -> actix_web::Error + Send + Sync>>,
