@@ -6,4 +6,4 @@ pub mod path;
 pub use json::{JsonConfig, ValidatedJson};
 pub use error::Error;
 pub use query::{QueryConfig, ValidatedQuery};
-pub use path::ValidatedPath;
+pub use path::{ValidatedPath, PathConfig};
