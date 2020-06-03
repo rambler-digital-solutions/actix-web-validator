@@ -1,3 +1,4 @@
+//! Path extractor.
 use std::fmt;
 use std::ops::Deref;
 use std::sync::Arc;
@@ -9,11 +10,6 @@ use serde::de::{Deserialize, DeserializeOwned};
 use validator::Validate;
 
 use crate::error::{DeserializeErrors, Error};
-
-#[derive(PartialEq, Eq, PartialOrd, Ord)]
-pub struct ValidatedPath<T> {
-    inner: T,
-}
 
 /// Extract typed information from the request's path.
 ///
@@ -47,6 +43,11 @@ pub struct ValidatedPath<T> {
 ///     );
 /// }
 /// ```
+#[derive(PartialEq, Eq, PartialOrd, Ord)]
+pub struct ValidatedPath<T> {
+    inner: T,
+}
+
 impl<T> ValidatedPath<T> {
     /// Deconstruct to an inner value
     pub fn into_inner(self) -> T {

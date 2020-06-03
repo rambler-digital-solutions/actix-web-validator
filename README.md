@@ -24,6 +24,48 @@ This crate works with Cargo and can be found on
 actix-web-validator = "0.1"
 ```
 
+## Supported `actix_web::web` extractors:
+* `web::Json`
+* `web::Query`
+* `web::Path`
+
+### Supported `actix_web` version is `1.*`
+
+### Example:
+
+```rust
+use actix_web::{web, App};
+use serde_derive::Deserialize;
+use actix_web_validator::ValidatedQuery;
+use validator::Validate;
+use validator_derive::Validate;
+
+#[derive(Debug, Deserialize)]
+pub enum ResponseType {
+    Token,
+    Code
+}
+
+#[derive(Deserialize, Validate)]
+pub struct AuthRequest {
+    #[validate(range(min = 1000, max = 9999))]
+    id: u64,
+    response_type: ResponseType,
+}
+
+// Use `Query` extractor for query information (and destructure it within the signature).
+// This handler gets called only if the request's query string contains a `username` field.
+// The correct request for this handler would be `/index.html?id=19&response_type=Code"`.
+fn index(web::Query(info): web::Query<AuthRequest>) -> String {
+    format!("Auth request for client with id={} and type={:?}!", info.id, info.response_type)
+}
+
+fn main() {
+    let app = App::new().service(
+        web::resource("/index.html").route(web::get().to(index))); // <- use `Query` extractor
+}
+```
+
 ## License
 
 actix-web-validator is licensed under MIT license ([LICENSE](LICENSE) or http://opensource.org/licenses/MIT)
