@@ -13,6 +13,43 @@ use validator::Validate;
 
 use crate::error::Error;
 
+/// ValidatedJson can be used for exstracting typed information and validation
+/// from request's payload.
+///
+/// To extract and typed information from request's body, the type `T` must
+/// implement the `Deserialize` trait from *serde* 
+/// and `Validate` trait from *validator* crate.
+///
+/// [**JsonConfig**](struct.JsonConfig.html) allows to configure extraction
+/// process.
+///
+/// ## Example
+///
+/// ```rust
+/// use actix_web::{web, App};
+/// use actix_web_validator::ValidatedJson;
+/// use serde_derive::Deserialize;
+/// use validator::Validate;
+/// use validator_derive::Validate;
+///
+/// #[derive(Deserialize, Validate)]
+/// struct Info {
+///     #[validate(length(min = 3))]
+///     username: String,
+/// }
+///
+/// /// deserialize `Info` from request's body
+/// fn index(info: ValidatedJson<Info>) -> String {
+///     format!("Welcome {}!", info.username)
+/// }
+///
+/// fn main() {
+///     let app = App::new().service(
+///        web::resource("/index.html").route(
+///            web::post().to(index))
+///     );
+/// }
+/// ```
 #[derive(Debug)]
 pub struct ValidatedJson<T>(pub T);
 
@@ -37,9 +74,48 @@ impl<T> Deref for ValidatedJson<T> {
     }
 }
 
+/// Json extractor. Allow to extract typed information from request's
+/// payload and validate it.
+///
+/// To extract typed information from request's body, the type `T` must
+/// implement the `Deserialize` trait from *serde*.
+///
+/// To validate payload, the type `T` must implement the `Validate` trait
+/// from *validator* crate.
+///
+/// [**JsonConfig**](struct.JsonConfig.html) allows to configure extraction
+/// process.
+///
+/// ## Example
+///
+/// ```rust
+/// use actix_web::{web, App};
+/// use actix_web_validator::ValidatedJson;
+/// use serde_derive::Deserialize;
+/// use validator::Validate;
+/// use validator_derive::Validate;
+///
+/// #[derive(Deserialize, Validate)]
+/// struct Info {
+///     #[validate(length(min = 3))]
+///     username: String,
+/// }
+///
+/// /// deserialize `Info` from request's body
+/// fn index(info: ValidatedJson<Info>) -> String {
+///     format!("Welcome {}!", info.username)
+/// }
+///
+/// fn main() {
+///     let app = App::new().service(
+///        web::resource("/index.html").route(
+///            web::post().to(index))
+///     );
+/// }
+/// ```
 impl<T> FromRequest for ValidatedJson<T>
 where
-    T: DeserializeOwned + Validate + Debug + 'static,
+    T: DeserializeOwned + Validate + 'static,
 {
     type Error = actix_web::Error;
     type Future = Box<dyn Future<Item = Self, Error = Self::Error>>;
@@ -79,6 +155,45 @@ where
     }
 }
 
+/// Json extractor configuration
+///
+/// ```rust
+/// use actix_web::{error, web, App, FromRequest, HttpResponse};
+/// use serde_derive::Deserialize;
+/// use actix_web_validator::{ValidatedJson, JsonConfig};
+/// use validator::Validate;
+/// use validator_derive::Validate;
+///
+/// #[derive(Deserialize, Validate)]
+/// struct Info {
+///     #[validate(length(min = 3))]
+///     username: String,
+/// }
+///
+/// /// deserialize `Info` from request's body, max payload size is 4kb
+/// fn index(info: ValidatedJson<Info>) -> String {
+///     format!("Welcome {}!", info.username)
+/// }
+///
+/// fn main() {
+///     let app = App::new().service(
+///         web::resource("/index.html")
+///             .data(
+///                 // change json extractor configuration
+///                 ValidatedJson::<Info>::configure(|cfg| {
+///                     cfg.limit(4096)
+///                        .content_type(|mime| {  // <- accept text/plain content type
+///                            mime.type_() == mime::TEXT && mime.subtype() == mime::PLAIN
+///                        })
+///                        .error_handler(|err, req| {  // <- create custom error response
+///                           error::InternalError::from_response(
+///                               err, HttpResponse::Conflict().finish()).into()
+///                        })
+///             }))
+///             .route(web::post().to(index))
+///     );
+/// }
+/// ```
 #[derive(Clone)]
 pub struct JsonConfig {
     limit: usize,
