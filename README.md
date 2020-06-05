@@ -54,7 +54,7 @@ pub struct AuthRequest {
 }
 
 // Use `Query` extractor for query information (and destructure it within the signature).
-// This handler gets called only if the request's query string contains a `username` field.
+// This handler gets called only if the request's query string contains a `id` and `response_type` fields.
 // The correct request for this handler would be `/index.html?id=19&response_type=Code"`.
 fn index(web::Query(info): web::Query<AuthRequest>) -> String {
     format!("Auth request for client with id={} and type={:?}!", info.id, info.response_type)
