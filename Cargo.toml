@@ -9,6 +9,7 @@ categories = ["encoding", "web-programming"]
 license = "MIT"
 readme = "README.md"
 repository = "https://github.com/rambler-digital-solutions/actix-web-validator"
+documentation = "https://docs.rs/actix-web-validator/"
 
 [dependencies]
 actix-web = "1"
