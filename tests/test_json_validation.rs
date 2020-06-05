@@ -1,5 +1,4 @@
-use actix_service::Service;
-use actix_web::{error, http::StatusCode, test, web, App, FromRequest, HttpResponse};
+use actix_web::{error, http::StatusCode, test, web, App, FromRequest, HttpResponse, test::call_service};
 use actix_web_validator::{JsonConfig, ValidatedJson};
 use serde_derive::{Deserialize, Serialize};
 use validator::Validate;
@@ -33,7 +32,7 @@ async fn test_json_validation() {
             age: 24,
         })
         .to_request();
-    let resp = app.call(req).await.unwrap();
+    let resp = call_service(&mut app, req).await;
     assert_eq!(resp.status(), StatusCode::OK);
 
     // Test 400 status
@@ -44,7 +43,7 @@ async fn test_json_validation() {
             age: 24,
         })
         .to_request();
-    let resp = test::call_service(&mut app, req).await;
+    let resp = call_service(&mut app, req).await;
     assert_eq!(resp.status(), StatusCode::BAD_REQUEST);
 }
 
@@ -71,7 +70,7 @@ async fn test_custom_json_validation_error() {
             age: 24,
         })
         .to_request();
-    let resp = test::call_service(&mut app, req).await;
+    let resp = call_service(&mut app, req).await;
     dbg!(&resp);
     assert_eq!(resp.status(), StatusCode::CONFLICT);
 }
@@ -98,7 +97,7 @@ async fn test_validated_json_asref_deref() {
             age: 24,
         })
         .to_request();
-    test::call_service(&mut app, req).await;
+    call_service(&mut app, req).await;
 }
 
 #[actix_rt::test]
@@ -120,7 +119,7 @@ async fn test_validated_json_into_inner() {
             age: 24,
         })
         .to_request();
-    test::call_service(&mut app, req).await;
+    call_service(&mut app, req).await;
 }
 
 #[actix_rt::test]
@@ -139,6 +138,6 @@ async fn test_validated_json_limit() {
             age: 24,
         })
         .to_request();
-    let resp = test::call_service(&mut app, req).await;
+    let resp = call_service(&mut app, req).await;
     assert_eq!(resp.status(), StatusCode::BAD_REQUEST);
 }

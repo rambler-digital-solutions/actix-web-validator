@@ -1,7 +1,6 @@
 use std::fmt;
 
-use actix_service::Service;
-use actix_web::{error, http::StatusCode, test, web, App, HttpResponse};
+use actix_web::{error, http::StatusCode, test, web, App, HttpResponse, test::call_service};
 use actix_web_validator::ValidatedPath;
 use serde_derive::Deserialize;
 use validator::Validate;
@@ -30,12 +29,12 @@ async fn test_path_validation() {
 
     // Test 400 status
     let req = test::TestRequest::with_uri("/test/42/").to_request();
-    let resp = app.call(req).await.unwrap();
+    let resp = call_service(&mut app, req).await;
     assert_eq!(resp.status(), StatusCode::NOT_FOUND);
 
     // Test 200 status
     let req = test::TestRequest::with_uri("/test/28/").to_request();
-    let resp = app.call(req).await.unwrap();
+    let resp = call_service(&mut app, req).await;
     assert_eq!(resp.status(), StatusCode::OK);
 }
 
@@ -54,7 +53,7 @@ async fn test_custom_path_validation_error() {
     .await;
 
     let req = test::TestRequest::with_uri("/test/42/").to_request();
-    let resp = app.call(req).await.unwrap();
+    let resp = call_service(&mut app, req).await;
     assert_eq!(resp.status(), StatusCode::CONFLICT);
 }
 
@@ -69,7 +68,7 @@ async fn test_deref_validated_path() {
     .await;
 
     let req = test::TestRequest::with_uri("/test/28/").to_request();
-    app.call(req).await.unwrap();
+    call_service(&mut app, req).await;
 }
 
 #[actix_rt::test]
@@ -86,6 +85,6 @@ async fn test_path_implementation() {
     let mut app =
         test::init_service(App::new().service(web::resource("/test/{id}/").to(test_handler))).await;
     let req = test::TestRequest::with_uri("/test/28/").to_request();
-    let resp = app.call(req).await.unwrap();
+    let resp = call_service(&mut app, req).await;
     assert_eq!(resp.status(), StatusCode::OK);
 }
