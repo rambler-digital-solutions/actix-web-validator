@@ -13,15 +13,16 @@ struct JsonPayload {
     age: u8,
 }
 
-fn test_handler(_query: ValidatedJson<JsonPayload>) -> HttpResponse {
+async fn test_handler(_query: ValidatedJson<JsonPayload>) -> HttpResponse {
+    dbg!("test requested");
     HttpResponse::Ok().finish()
 }
 
-#[test]
-fn test_json_validation() {
+#[actix_rt::test]
+async fn test_json_validation() {
     let mut app = test::init_service(
         App::new().service(web::resource("/test").route(web::post().to(test_handler))),
-    );
+    ).await;
 
     // Test 200 status
     let req = test::TestRequest::post()
@@ -31,7 +32,7 @@ fn test_json_validation() {
             age: 24,
         })
         .to_request();
-    let resp = test::block_on(app.call(req)).unwrap();
+    let resp = app.call(req).await.unwrap();
     assert_eq!(resp.status(), StatusCode::OK);
 
     // Test 400 status
@@ -42,12 +43,12 @@ fn test_json_validation() {
             age: 24,
         })
         .to_request();
-    let resp = test::block_on(app.call(req)).unwrap();
+    let resp = test::call_service(&mut app, req).await;
     assert_eq!(resp.status(), StatusCode::BAD_REQUEST);
 }
 
-#[test]
-fn test_custom_validation_error() {
+#[actix_rt::test]
+async fn test_custom_json_validation_error() {
     let mut app = test::init_service(
         App::new().service(
             web::resource("/test")
@@ -59,7 +60,7 @@ fn test_custom_validation_error() {
                 )
                 .route(web::post().to(test_handler)),
         ),
-    );
+    ).await;
 
     let req = test::TestRequest::post()
         .uri("/test")
@@ -68,12 +69,12 @@ fn test_custom_validation_error() {
             age: 24,
         })
         .to_request();
-    let resp = test::block_on(app.call(req)).unwrap();
+    let resp = test::call_service(&mut app, req).await;
     assert_eq!(resp.status(), StatusCode::CONFLICT);
 }
 
-#[test]
-fn test_validated_json_asref_deref() {
+#[actix_rt::test]
+async fn test_validated_json_asref_deref() {
     let mut app = test::init_service(App::new().service(web::resource("/test").to(
         |payload: ValidatedJson<JsonPayload>| {
             assert_eq!(payload.age, 24);
@@ -84,7 +85,7 @@ fn test_validated_json_asref_deref() {
             assert_eq!(payload.as_ref(), &reference);
             HttpResponse::Ok().finish()
         },
-    )));
+    ))).await;
 
     let req = test::TestRequest::post()
         .uri("/test")
@@ -93,11 +94,11 @@ fn test_validated_json_asref_deref() {
             age: 24,
         })
         .to_request();
-    test::block_on(app.call(req)).unwrap();
+    test::call_service(&mut app, req).await;
 }
 
-#[test]
-fn test_validated_json_into_inner() {
+#[actix_rt::test]
+async fn test_validated_json_into_inner() {
     let mut app = test::init_service(App::new().service(web::resource("/test").to(
         |payload: ValidatedJson<JsonPayload>| {
             let payload = payload.into_inner();
@@ -105,7 +106,7 @@ fn test_validated_json_into_inner() {
             assert_eq!(payload.page_url, "https://my_page.com");
             HttpResponse::Ok().finish()
         },
-    )));
+    ))).await;
 
     let req = test::TestRequest::post()
         .uri("/test")
@@ -114,18 +115,18 @@ fn test_validated_json_into_inner() {
             age: 24,
         })
         .to_request();
-    test::block_on(app.call(req)).unwrap();
+    test::call_service(&mut app, req).await;
 }
 
-#[test]
-fn test_validated_json_limit() {
+#[actix_rt::test]
+async fn test_validated_json_limit() {
     let mut app = test::init_service(
         App::new().service(
             web::resource("/test")
                 .data(actix_web_validator::JsonConfig::default().limit(1))
                 .route(web::post().to(test_handler)),
         ),
-    );
+    ).await;
 
     let req = test::TestRequest::post()
         .uri("/test")
@@ -134,6 +135,6 @@ fn test_validated_json_limit() {
             age: 24,
         })
         .to_request();
-    let resp = test::block_on(app.call(req)).unwrap();
+    let resp = test::call_service(&mut app, req).await;
     assert_eq!(resp.status(), StatusCode::BAD_REQUEST);
 }

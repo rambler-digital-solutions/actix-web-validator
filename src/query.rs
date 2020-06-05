@@ -2,10 +2,11 @@
 use crate::error::Error;
 use std::sync::Arc;
 use std::{fmt, ops};
+use std::ops::Deref;
 
 use actix_web::{FromRequest, HttpRequest};
+use futures::future::{err, ok, Ready};
 use serde::de;
-use std::ops::Deref;
 use validator::Validate;
 
 /// Query extractor configuration.
@@ -193,7 +194,7 @@ where
     T: de::DeserializeOwned + Validate,
 {
     type Error = actix_web::Error;
-    type Future = Result<Self, actix_web::Error>;
+    type Future = Ready<Result<Self, Self::Error>>;
     type Config = QueryConfig;
 
     /// Builds Query struct from request and provides validation mechanism
@@ -215,7 +216,6 @@ where
                     .map(move |_| value)
                     .map_err(Error::Validate)
             })
-            .map(ValidatedQuery)
             .map_err(move |e| {
                 log::debug!(
                     "Failed during Query extractor validation. \
@@ -223,10 +223,12 @@ where
                     req.path()
                 );
                 if let Some(error_handler) = error_handler {
-                    (error_handler)(e, req)
+                    (error_handler)(e.into(), req)
                 } else {
                     e.into()
                 }
             })
+            .map(|value| ok(ValidatedQuery(value)))
+            .unwrap_or_else(|e| err(e))
     }
 }
