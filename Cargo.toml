@@ -1,6 +1,6 @@
 [package]
 name = "actix-web-validator"
-version = "0.2.1-alpha.0"
+version = "0.2.1"
 authors = ["Kolomatskiy Artem <kolomatskiy@bk.ru>"]
 edition = "2018"
 description = "Validation mechanism for actix-web"
