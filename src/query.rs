@@ -224,7 +224,7 @@ where
                     req.path()
                 );
                 if let Some(error_handler) = error_handler {
-                    (error_handler)(e.into(), req)
+                    (error_handler)(e, req)
                 } else {
                     e.into()
                 }
