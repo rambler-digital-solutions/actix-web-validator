@@ -33,7 +33,7 @@ use crate::error::{DeserializeErrors, Error};
 /// }
 ///
 /// /// extract `Info` from a path using serde
-/// fn index(info: ValidatedPath<Info>) -> Result<String, Error> {
+/// async fn index(info: ValidatedPath<Info>) -> Result<String, Error> {
 ///     Ok(format!("Welcome {}!", info.username))
 /// }
 ///
@@ -103,7 +103,7 @@ impl<T: fmt::Display> fmt::Display for ValidatedPath<T> {
 /// }
 ///
 /// /// extract `Info` from a path using serde
-/// fn index(info: ValidatedPath<Info>) -> Result<String, Error> {
+/// async fn index(info: ValidatedPath<Info>) -> Result<String, Error> {
 ///     Ok(format!("Welcome {}!", info.username))
 /// }
 ///
@@ -149,7 +149,7 @@ where
                     } else {
                         actix_web::error::ErrorNotFound(e)
                     }
-                })
+                }),
         )
     }
 }
@@ -179,14 +179,14 @@ where
 /// }
 ///
 /// // deserialize `Info` from request's path
-/// fn index(folder: ValidatedPath<Filter>) -> String {
+/// async fn index(folder: ValidatedPath<Filter>) -> String {
 ///     format!("Selected folder: {:?}!", folder)
 /// }
 ///
 /// fn main() {
 ///     let app = App::new().service(
 ///         web::resource("/messages/{folder}")
-///             .data(PathConfig::default().error_handler(|err, req| {
+///             .app_data(PathConfig::default().error_handler(|err, req| {
 ///                 error::InternalError::from_response(
 ///                     err,
 ///                     HttpResponse::Conflict().finish(),

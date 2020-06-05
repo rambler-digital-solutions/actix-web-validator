@@ -17,7 +17,8 @@ async fn test_handler(_query: ValidatedQuery<QueryParams>) -> HttpResponse {
 
 #[actix_rt::test]
 async fn test_query_validation() {
-    let mut app = test::init_service(App::new().service(web::resource("/test").to(test_handler))).await;
+    let mut app =
+        test::init_service(App::new().service(web::resource("/test").to(test_handler))).await;
 
     // Test 400 status
     let req = test::TestRequest::with_uri("/test?id=42").to_request();
@@ -34,14 +35,15 @@ async fn test_query_validation() {
 async fn test_custom_query_validation_error() {
     let mut app = test::init_service(
         App::new()
-            .data(
+            .app_data(
                 actix_web_validator::QueryConfig::default().error_handler(|err, _req| {
                     error::InternalError::from_response(err, HttpResponse::Conflict().finish())
                         .into()
                 }),
             )
             .service(web::resource("/test").to(test_handler)),
-    ).await;
+    )
+    .await;
 
     let req = test::TestRequest::with_uri("/test?id=42").to_request();
     let resp = app.call(req).await.unwrap();
@@ -55,7 +57,8 @@ async fn test_deref_validated_query() {
             assert_eq!(query.id, 28);
             HttpResponse::Ok().finish()
         },
-    ))).await;
+    )))
+    .await;
 
     let req = test::TestRequest::with_uri("/test?id=28").to_request();
     app.call(req).await.unwrap();
@@ -70,7 +73,8 @@ async fn test_query_implementation() {
         HttpResponse::Ok().finish()
     }
 
-    let mut app = test::init_service(App::new().service(web::resource("/test").to(test_handler))).await;
+    let mut app =
+        test::init_service(App::new().service(web::resource("/test").to(test_handler))).await;
     let req = test::TestRequest::with_uri("/test?id=28").to_request();
     let resp = app.call(req).await.unwrap();
     assert_eq!(resp.status(), StatusCode::OK);

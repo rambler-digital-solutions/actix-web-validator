@@ -43,14 +43,15 @@ async fn test_path_validation() {
 async fn test_custom_path_validation_error() {
     let mut app = test::init_service(
         App::new()
-            .data(
+            .app_data(
                 actix_web_validator::PathConfig::default().error_handler(|err, _req| {
                     error::InternalError::from_response(err, HttpResponse::Conflict().finish())
                         .into()
                 }),
             )
             .service(web::resource("/test/{id}/").to(test_handler)),
-    ).await;
+    )
+    .await;
 
     let req = test::TestRequest::with_uri("/test/42/").to_request();
     let resp = app.call(req).await.unwrap();
@@ -64,7 +65,8 @@ async fn test_deref_validated_path() {
             assert_eq!(query.id, 28);
             HttpResponse::Ok().finish()
         },
-    ))).await;
+    )))
+    .await;
 
     let req = test::TestRequest::with_uri("/test/28/").to_request();
     app.call(req).await.unwrap();
