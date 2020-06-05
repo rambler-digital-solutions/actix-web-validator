@@ -1,3 +1,4 @@
+//! Error declaration.
 use actix_web;
 use actix_web::http::StatusCode;
 use actix_web::{HttpResponse, ResponseError};
