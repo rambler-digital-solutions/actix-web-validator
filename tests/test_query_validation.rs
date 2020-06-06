@@ -1,4 +1,4 @@
-use actix_web::{error, http::StatusCode, test, web, App, HttpResponse, test::call_service};
+use actix_web::{error, http::StatusCode, test, test::call_service, web, App, HttpResponse};
 use actix_web_validator::ValidatedQuery;
 use serde_derive::Deserialize;
 use validator::Validate;
