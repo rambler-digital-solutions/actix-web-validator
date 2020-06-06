@@ -6,6 +6,7 @@ use std::sync::Arc;
 use actix_router::PathDeserializer;
 use actix_web::dev::Payload;
 use actix_web::{FromRequest, HttpRequest};
+use futures::future::{ready, Ready};
 use serde::de::{Deserialize, DeserializeOwned};
 use validator::Validate;
 
@@ -32,7 +33,7 @@ use crate::error::{DeserializeErrors, Error};
 /// }
 ///
 /// /// extract `Info` from a path using serde
-/// fn index(info: ValidatedPath<Info>) -> Result<String, Error> {
+/// async fn index(info: ValidatedPath<Info>) -> Result<String, Error> {
 ///     Ok(format!("Welcome {}!", info.username))
 /// }
 ///
@@ -102,7 +103,7 @@ impl<T: fmt::Display> fmt::Display for ValidatedPath<T> {
 /// }
 ///
 /// /// extract `Info` from a path using serde
-/// fn index(info: ValidatedPath<Info>) -> Result<String, Error> {
+/// async fn index(info: ValidatedPath<Info>) -> Result<String, Error> {
 ///     Ok(format!("Welcome {}!", info.username))
 /// }
 ///
@@ -118,7 +119,7 @@ where
     T: DeserializeOwned + Validate,
 {
     type Error = actix_web::Error;
-    type Future = Result<Self, actix_web::Error>;
+    type Future = Ready<Result<Self, Self::Error>>;
     type Config = PathConfig;
 
     #[inline]
@@ -127,28 +128,29 @@ where
             .app_data::<Self::Config>()
             .map(|c| c.ehandler.clone())
             .unwrap_or(None);
-
-        Deserialize::deserialize(PathDeserializer::new(req.match_info()))
-            .map_err(|error| Error::Deserialize(DeserializeErrors::DeserializePath(error)))
-            .and_then(|value: T| {
-                value
-                    .validate()
-                    .map(move |_| value)
-                    .map_err(Error::Validate)
-            })
-            .map(|inner| ValidatedPath { inner })
-            .map_err(move |e| {
-                log::debug!(
-                    "Failed during Path extractor deserialization. \
-                     Request path: {:?}",
-                    req.path()
-                );
-                if let Some(error_handler) = error_handler {
-                    (error_handler)(e, req)
-                } else {
-                    actix_web::error::ErrorNotFound(e)
-                }
-            })
+        ready(
+            Deserialize::deserialize(PathDeserializer::new(req.match_info()))
+                .map_err(|error| Error::Deserialize(DeserializeErrors::DeserializePath(error)))
+                .and_then(|value: T| {
+                    value
+                        .validate()
+                        .map(move |_| value)
+                        .map_err(Error::Validate)
+                })
+                .map(|inner| ValidatedPath { inner })
+                .map_err(move |e| {
+                    log::debug!(
+                        "Failed during Path extractor deserialization. \
+                         Request path: {:?}",
+                        req.path()
+                    );
+                    if let Some(error_handler) = error_handler {
+                        (error_handler)(e, req)
+                    } else {
+                        actix_web::error::ErrorNotFound(e)
+                    }
+                }),
+        )
     }
 }
 
@@ -177,14 +179,14 @@ where
 /// }
 ///
 /// // deserialize `Info` from request's path
-/// fn index(folder: ValidatedPath<Filter>) -> String {
+/// async fn index(folder: ValidatedPath<Filter>) -> String {
 ///     format!("Selected folder: {:?}!", folder)
 /// }
 ///
 /// fn main() {
 ///     let app = App::new().service(
 ///         web::resource("/messages/{folder}")
-///             .data(PathConfig::default().error_handler(|err, req| {
+///             .app_data(PathConfig::default().error_handler(|err, req| {
 ///                 error::InternalError::from_response(
 ///                     err,
 ///                     HttpResponse::Conflict().finish(),

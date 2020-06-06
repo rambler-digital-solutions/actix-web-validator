@@ -1,7 +1,6 @@
 use std::fmt;
 
-use actix_service::Service;
-use actix_web::{error, http::StatusCode, test, web, App, HttpResponse};
+use actix_web::{error, http::StatusCode, test, web, App, HttpResponse, test::call_service};
 use actix_web_validator::ValidatedPath;
 use serde_derive::Deserialize;
 use validator::Validate;
@@ -19,60 +18,62 @@ impl fmt::Display for PathParams {
     }
 }
 
-fn test_handler(_query: ValidatedPath<PathParams>) -> HttpResponse {
+async fn test_handler(_query: ValidatedPath<PathParams>) -> HttpResponse {
     HttpResponse::Ok().finish()
 }
 
-#[test]
-fn test_path_validation() {
+#[actix_rt::test]
+async fn test_path_validation() {
     let mut app =
-        test::init_service(App::new().service(web::resource("/test/{id}/").to(test_handler)));
+        test::init_service(App::new().service(web::resource("/test/{id}/").to(test_handler))).await;
 
     // Test 400 status
     let req = test::TestRequest::with_uri("/test/42/").to_request();
-    let resp = test::block_on(app.call(req)).unwrap();
+    let resp = call_service(&mut app, req).await;
     assert_eq!(resp.status(), StatusCode::NOT_FOUND);
 
     // Test 200 status
     let req = test::TestRequest::with_uri("/test/28/").to_request();
-    let resp = test::block_on(app.call(req)).unwrap();
+    let resp = call_service(&mut app, req).await;
     assert_eq!(resp.status(), StatusCode::OK);
 }
 
-#[test]
-fn test_custom_validation_error() {
+#[actix_rt::test]
+async fn test_custom_path_validation_error() {
     let mut app = test::init_service(
         App::new()
-            .data(
+            .app_data(
                 actix_web_validator::PathConfig::default().error_handler(|err, _req| {
                     error::InternalError::from_response(err, HttpResponse::Conflict().finish())
                         .into()
                 }),
             )
             .service(web::resource("/test/{id}/").to(test_handler)),
-    );
+    )
+    .await;
 
     let req = test::TestRequest::with_uri("/test/42/").to_request();
-    let resp = test::block_on(app.call(req)).unwrap();
+    let resp = call_service(&mut app, req).await;
     assert_eq!(resp.status(), StatusCode::CONFLICT);
 }
 
-#[test]
-fn test_deref_validated_path() {
+#[actix_rt::test]
+async fn test_deref_validated_path() {
     let mut app = test::init_service(App::new().service(web::resource("/test/{id}/").to(
         |query: ValidatedPath<PathParams>| {
             assert_eq!(query.id, 28);
             HttpResponse::Ok().finish()
         },
-    )));
+    )))
+    .await;
 
     let req = test::TestRequest::with_uri("/test/28/").to_request();
-    test::block_on(app.call(req)).unwrap();
+    call_service(&mut app, req).await;
 }
 
-#[test]
-fn test_path_implementation() {
-    fn test_handler(query: ValidatedPath<PathParams>) -> HttpResponse {
+#[actix_rt::test]
+async fn test_path_implementation() {
+    async fn test_handler(query: ValidatedPath<PathParams>) -> HttpResponse {
         let reference = PathParams { id: 28 };
         assert_eq!(format!("{:?}", &reference), format!("{:?}", &query));
         assert_eq!(format!("{}", &reference), format!("{}", &query));
@@ -82,8 +83,8 @@ fn test_path_implementation() {
     }
 
     let mut app =
-        test::init_service(App::new().service(web::resource("/test/{id}/").to(test_handler)));
+        test::init_service(App::new().service(web::resource("/test/{id}/").to(test_handler))).await;
     let req = test::TestRequest::with_uri("/test/28/").to_request();
-    let resp = test::block_on(app.call(req)).unwrap();
+    let resp = call_service(&mut app, req).await;
     assert_eq!(resp.status(), StatusCode::OK);
 }

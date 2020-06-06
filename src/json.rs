@@ -7,7 +7,8 @@ use actix_http::Payload;
 use actix_web::dev::JsonBody;
 use actix_web::FromRequest;
 use actix_web::HttpRequest;
-use futures::Future;
+use futures::future::{FutureExt, LocalBoxFuture};
+// use futures_util::future::{LocalBoxFuture, Try};
 use serde::de::DeserializeOwned;
 use validator::Validate;
 
@@ -17,7 +18,7 @@ use crate::error::Error;
 /// from request's payload.
 ///
 /// To extract and typed information from request's body, the type `T` must
-/// implement the `Deserialize` trait from *serde* 
+/// implement the `Deserialize` trait from *serde*
 /// and `Validate` trait from *validator* crate.
 ///
 /// [**JsonConfig**](struct.JsonConfig.html) allows to configure extraction
@@ -39,7 +40,7 @@ use crate::error::Error;
 /// }
 ///
 /// /// deserialize `Info` from request's body
-/// fn index(info: ValidatedJson<Info>) -> String {
+/// async fn index(info: ValidatedJson<Info>) -> String {
 ///     format!("Welcome {}!", info.username)
 /// }
 ///
@@ -102,7 +103,7 @@ impl<T> Deref for ValidatedJson<T> {
 /// }
 ///
 /// /// deserialize `Info` from request's body
-/// fn index(info: ValidatedJson<Info>) -> String {
+/// async fn index(info: ValidatedJson<Info>) -> String {
 ///     format!("Welcome {}!", info.username)
 /// }
 ///
@@ -118,7 +119,7 @@ where
     T: DeserializeOwned + Validate + 'static,
 {
     type Error = actix_web::Error;
-    type Future = Box<dyn Future<Item = Self, Error = Self::Error>>;
+    type Future = LocalBoxFuture<'static, Result<Self, Self::Error>>;
     type Config = JsonConfig;
 
     #[inline]
@@ -129,29 +130,31 @@ where
             .map(|c| (c.limit, c.ehandler.clone(), c.content_type.clone()))
             .unwrap_or((32768, None, None));
 
-        Box::new(
-            JsonBody::new(req, payload, ctype)
-                .limit(limit)
-                .map_err(Error::from)
-                .and_then(|value: T| {
-                    value
-                        .validate()
-                        .map(|_| ValidatedJson(value))
-                        .map_err(Error::from)
-                })
-                .map_err(move |e| {
+        JsonBody::new(req, payload, ctype)
+            .limit(limit)
+            .map(|res: Result<T, _>| match res {
+                Ok(data) => data
+                    .validate()
+                    .map(|_| ValidatedJson(data))
+                    .map_err(Error::from),
+                Err(e) => Err(Error::from(e)),
+            })
+            .map(move |res| match res {
+                Ok(data) => Ok(data),
+                Err(e) => {
                     log::debug!(
                         "Failed to deserialize Json from payload. \
                          Request path: {}",
                         req2.path()
                     );
                     if let Some(err) = err {
-                        (*err)(e, &req2)
+                        Err((*err)(e, &req2))
                     } else {
-                        e.into()
+                        Err(e.into())
                     }
-                }),
-        )
+                }
+            })
+            .boxed_local()
     }
 }
 
@@ -171,14 +174,14 @@ where
 /// }
 ///
 /// /// deserialize `Info` from request's body, max payload size is 4kb
-/// fn index(info: ValidatedJson<Info>) -> String {
+/// async fn index(info: ValidatedJson<Info>) -> String {
 ///     format!("Welcome {}!", info.username)
 /// }
 ///
 /// fn main() {
 ///     let app = App::new().service(
 ///         web::resource("/index.html")
-///             .data(
+///             .app_data(
 ///                 // change json extractor configuration
 ///                 ValidatedJson::<Info>::configure(|cfg| {
 ///                     cfg.limit(4096)

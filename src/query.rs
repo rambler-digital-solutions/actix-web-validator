@@ -1,11 +1,12 @@
 //! Query extractor.
 use crate::error::Error;
+use std::ops::Deref;
 use std::sync::Arc;
 use std::{fmt, ops};
 
 use actix_web::{FromRequest, HttpRequest};
+use futures::future::{err, ok, Ready};
 use serde::de;
-use std::ops::Deref;
 use validator::Validate;
 
 /// Query extractor configuration.
@@ -26,20 +27,21 @@ use validator::Validate;
 /// }
 ///
 /// /// deserialize `Info` from request's querystring
-/// fn index(info: ValidatedQuery<Info>) -> String {
+/// async fn index(info: ValidatedQuery<Info>) -> String {
 ///     format!("Welcome {}!", info.username)
 /// }
 ///
 /// fn main() {
 ///     let app = App::new().service(
-///         web::resource("/index.html").data(
-///             // change query extractor configuration
-///             ValidatedQuery::<Info>::configure(|cfg| {
-///                 cfg.error_handler(|err, req| {  // <- create custom error response
-///                     error::InternalError::from_response(
-///                         err, HttpResponse::Conflict().finish()).into()
-///                 })
-///             }))
+///         web::resource("/index.html")
+///             .app_data(
+///                 // change query extractor configuration
+///                 ValidatedQuery::<Info>::configure(|cfg| {
+///                     cfg.error_handler(|err, req| {  // <- create custom error response
+///                         error::InternalError::from_response(
+///                             err, HttpResponse::Conflict().finish()).into()
+///                     })
+///                 }))
 ///             .route(web::post().to(index))
 ///     );
 /// }
@@ -97,7 +99,7 @@ impl Default for QueryConfig {
 /// // This handler gets called only if the request's query string contains a `id` and
 /// // `response_type` fields.
 /// // The correct request for this handler would be `/index.html?id=19&response_type=Code"`.
-/// fn index(web::Query(info): web::Query<AuthRequest>) -> String {
+/// async fn index(web::Query(info): web::Query<AuthRequest>) -> String {
 ///     format!("Authorization request for client with id={} and type={:?}!", info.id, info.response_type)
 /// }
 ///
@@ -179,7 +181,7 @@ where
 /// // This handler gets called only if the request's query string contains a `id` and
 /// // `response_type` fields.
 /// // The correct request for this handler would be `/index.html?id=19&response_type=Code"`.
-/// fn index(web::Query(info): web::Query<AuthRequest>) -> String {
+/// async fn index(web::Query(info): web::Query<AuthRequest>) -> String {
 ///     format!("Authorization request for client with id={} and type={:?}!", info.id, info.response_type)
 /// }
 ///
@@ -193,7 +195,7 @@ where
     T: de::DeserializeOwned + Validate,
 {
     type Error = actix_web::Error;
-    type Future = Result<Self, actix_web::Error>;
+    type Future = Ready<Result<Self, Self::Error>>;
     type Config = QueryConfig;
 
     /// Builds Query struct from request and provides validation mechanism
@@ -215,7 +217,6 @@ where
                     .map(move |_| value)
                     .map_err(Error::Validate)
             })
-            .map(ValidatedQuery)
             .map_err(move |e| {
                 log::debug!(
                     "Failed during Query extractor validation. \
@@ -228,5 +229,7 @@ where
                     e.into()
                 }
             })
+            .map(|value| ok(ValidatedQuery(value)))
+            .unwrap_or_else(|e| err(e))
     }
 }
