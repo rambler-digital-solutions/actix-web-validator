@@ -3,7 +3,6 @@ use actix_web::{
 };
 use actix_web_validator::{JsonConfig, ValidatedJson};
 use serde_derive::{Deserialize, Serialize};
-use validator::Validate;
 use validator_derive::Validate;
 
 #[derive(Debug, PartialEq, Validate, Serialize, Deserialize)]
