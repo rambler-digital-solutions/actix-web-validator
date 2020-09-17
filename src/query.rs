@@ -17,7 +17,6 @@ use validator::Validate;
 /// use actix_web::{error, web, App, FromRequest, HttpResponse};
 /// use serde_derive::Deserialize;
 /// use actix_web_validator::{Query, QueryConfig};
-/// use validator::Validate;
 /// use validator_derive::Validate;
 ///
 /// #[derive(Deserialize, Validate)]
@@ -79,7 +78,6 @@ impl Default for QueryConfig {
 /// use actix_web::{web, App};
 /// use serde_derive::Deserialize;
 /// use actix_web_validator::Query;
-/// use validator::Validate;
 /// use validator_derive::Validate;
 ///
 /// #[derive(Debug, Deserialize)]
@@ -98,14 +96,14 @@ impl Default for QueryConfig {
 /// // Use `Query` extractor for query information (and destructure it within the signature).
 /// // This handler gets called only if the request's query string contains a `id` and
 /// // `response_type` fields.
-/// // The correct request for this handler would be `/index.html?id=19&response_type=Code"`.
-/// async fn index(web::Query(info): web::Query<AuthRequest>) -> String {
+/// // The correct request for this handler would be `/index.html?id=1234&response_type=Code"`.
+/// async fn index(info: Query<AuthRequest>) -> String {
 ///     format!("Authorization request for client with id={} and type={:?}!", info.id, info.response_type)
 /// }
 ///
 /// fn main() {
 ///     let app = App::new().service(
-///        web::resource("/index.html").route(web::get().to(index))); // <- use `Query` extractor
+///         web::resource("/index.html").route(web::get().to(index))); // <- use `Query` extractor
 /// }
 /// ```
 #[derive(PartialEq, Eq, PartialOrd, Ord)]

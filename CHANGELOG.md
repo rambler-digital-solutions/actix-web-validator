@@ -5,6 +5,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- [#13](https://github.com/rambler-digital-solutions/actix-web-validator/issues/13): Add actix-web 3.x.x support.
+
+### Deprecated
+- `ValidatedJson`, `ValidatedQuery` and `ValidatedPath` are depricated in favor of same names from actix (`Json`, `Query` and `Path`).
 
 ## [1.0.0] 2020-06-06
 - [#11](https://github.com/rambler-digital-solutions/actix-web-validator/issues/11): Add actix-web 2.0.0 support.

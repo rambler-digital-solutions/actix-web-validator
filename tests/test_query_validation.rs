@@ -1,5 +1,5 @@
 use actix_web::{error, http::StatusCode, test, test::call_service, web, App, HttpResponse};
-use actix_web_validator::ValidatedQuery;
+use actix_web_validator::Query;
 use serde_derive::Deserialize;
 use validator_derive::Validate;
 
@@ -9,7 +9,7 @@ struct QueryParams {
     id: u8,
 }
 
-async fn test_handler(_query: ValidatedQuery<QueryParams>) -> HttpResponse {
+async fn test_handler(_query: Query<QueryParams>) -> HttpResponse {
     HttpResponse::Ok().finish()
 }
 
@@ -51,7 +51,7 @@ async fn test_custom_query_validation_error() {
 #[actix_rt::test]
 async fn test_deref_validated_query() {
     let mut app = test::init_service(App::new().service(web::resource("/test").to(
-        |query: ValidatedQuery<QueryParams>| {
+        |query: Query<QueryParams>| {
             assert_eq!(query.id, 28);
             HttpResponse::Ok().finish()
         },
@@ -64,7 +64,7 @@ async fn test_deref_validated_query() {
 
 #[actix_rt::test]
 async fn test_query_implementation() {
-    async fn test_handler(query: ValidatedQuery<QueryParams>) -> HttpResponse {
+    async fn test_handler(query: Query<QueryParams>) -> HttpResponse {
         let reference = QueryParams { id: 28 };
         assert_eq!(query.as_ref(), &reference);
         assert_eq!(query.into_inner(), reference);
