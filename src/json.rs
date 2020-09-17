@@ -13,7 +13,7 @@ use validator::Validate;
 
 use crate::error::Error;
 
-/// ValidatedJson can be used for exstracting typed information and validation
+/// Json can be used for exstracting typed information and validation
 /// from request's payload.
 ///
 /// To extract and typed information from request's body, the type `T` must
@@ -27,7 +27,7 @@ use crate::error::Error;
 ///
 /// ```rust
 /// use actix_web::{web, App};
-/// use actix_web_validator::ValidatedJson;
+/// use actix_web_validator::Json;
 /// use serde_derive::Deserialize;
 /// use validator::Validate;
 /// use validator_derive::Validate;
@@ -39,7 +39,7 @@ use crate::error::Error;
 /// }
 ///
 /// /// deserialize `Info` from request's body
-/// async fn index(info: ValidatedJson<Info>) -> String {
+/// async fn index(info: Json<Info>) -> String {
 ///     format!("Welcome {}!", info.username)
 /// }
 ///
@@ -51,22 +51,25 @@ use crate::error::Error;
 /// }
 /// ```
 #[derive(Debug)]
-pub struct ValidatedJson<T>(pub T);
+pub struct Json<T>(pub T);
 
-impl<T> ValidatedJson<T> {
+#[deprecated(note = "Please, use actix_web_validator::Json instead.", since = "2.0.0")]
+pub type ValidatedJson<T> = Json<T>;
+
+impl<T> Json<T> {
     /// Deconstruct to an inner value
     pub fn into_inner(self) -> T {
         self.0
     }
 }
 
-impl<T> AsRef<T> for ValidatedJson<T> {
+impl<T> AsRef<T> for Json<T> {
     fn as_ref(&self) -> &T {
         &self.0
     }
 }
 
-impl<T> Deref for ValidatedJson<T> {
+impl<T> Deref for Json<T> {
     type Target = T;
 
     fn deref(&self) -> &T {
@@ -90,7 +93,7 @@ impl<T> Deref for ValidatedJson<T> {
 ///
 /// ```rust
 /// use actix_web::{web, App};
-/// use actix_web_validator::ValidatedJson;
+/// use actix_web_validator::Json;
 /// use serde_derive::Deserialize;
 /// use validator::Validate;
 /// use validator_derive::Validate;
@@ -102,7 +105,7 @@ impl<T> Deref for ValidatedJson<T> {
 /// }
 ///
 /// /// deserialize `Info` from request's body
-/// async fn index(info: ValidatedJson<Info>) -> String {
+/// async fn index(info: Json<Info>) -> String {
 ///     format!("Welcome {}!", info.username)
 /// }
 ///
@@ -113,7 +116,7 @@ impl<T> Deref for ValidatedJson<T> {
 ///     );
 /// }
 /// ```
-impl<T> FromRequest for ValidatedJson<T>
+impl<T> FromRequest for Json<T>
 where
     T: DeserializeOwned + Validate + 'static,
 {
@@ -134,7 +137,7 @@ where
             .map(|res: Result<T, _>| match res {
                 Ok(data) => data
                     .validate()
-                    .map(|_| ValidatedJson(data))
+                    .map(|_| Json(data))
                     .map_err(Error::from),
                 Err(e) => Err(Error::from(e)),
             })
@@ -162,7 +165,7 @@ where
 /// ```rust
 /// use actix_web::{error, web, App, FromRequest, HttpResponse};
 /// use serde_derive::Deserialize;
-/// use actix_web_validator::{ValidatedJson, JsonConfig};
+/// use actix_web_validator::{Json, JsonConfig};
 /// use validator::Validate;
 /// use validator_derive::Validate;
 ///
@@ -173,7 +176,7 @@ where
 /// }
 ///
 /// /// deserialize `Info` from request's body, max payload size is 4kb
-/// async fn index(info: ValidatedJson<Info>) -> String {
+/// async fn index(info: Json<Info>) -> String {
 ///     format!("Welcome {}!", info.username)
 /// }
 ///
@@ -182,7 +185,7 @@ where
 ///         web::resource("/index.html")
 ///             .app_data(
 ///                 // change json extractor configuration
-///                 ValidatedJson::<Info>::configure(|cfg| {
+///                 Json::<Info>::configure(|cfg| {
 ///                     cfg.limit(4096)
 ///                        .content_type(|mime| {  // <- accept text/plain content type
 ///                            mime.type_() == mime::TEXT && mime.subtype() == mime::PLAIN

@@ -16,7 +16,7 @@ use validator::Validate;
 /// ```rust
 /// use actix_web::{error, web, App, FromRequest, HttpResponse};
 /// use serde_derive::Deserialize;
-/// use actix_web_validator::{ValidatedQuery, QueryConfig};
+/// use actix_web_validator::{Query, QueryConfig};
 /// use validator::Validate;
 /// use validator_derive::Validate;
 ///
@@ -27,7 +27,7 @@ use validator::Validate;
 /// }
 ///
 /// /// deserialize `Info` from request's querystring
-/// async fn index(info: ValidatedQuery<Info>) -> String {
+/// async fn index(info: Query<Info>) -> String {
 ///     format!("Welcome {}!", info.username)
 /// }
 ///
@@ -36,7 +36,7 @@ use validator::Validate;
 ///         web::resource("/index.html")
 ///             .app_data(
 ///                 // change query extractor configuration
-///                 ValidatedQuery::<Info>::configure(|cfg| {
+///                 Query::<Info>::configure(|cfg| {
 ///                     cfg.error_handler(|err, req| {  // <- create custom error response
 ///                         error::InternalError::from_response(
 ///                             err, HttpResponse::Conflict().finish()).into()
@@ -78,7 +78,7 @@ impl Default for QueryConfig {
 /// ```rust
 /// use actix_web::{web, App};
 /// use serde_derive::Deserialize;
-/// use actix_web_validator::ValidatedQuery;
+/// use actix_web_validator::Query;
 /// use validator::Validate;
 /// use validator_derive::Validate;
 ///
@@ -109,15 +109,18 @@ impl Default for QueryConfig {
 /// }
 /// ```
 #[derive(PartialEq, Eq, PartialOrd, Ord)]
-pub struct ValidatedQuery<T>(pub T);
+pub struct Query<T>(pub T);
 
-impl<T> AsRef<T> for ValidatedQuery<T> {
+#[deprecated(note = "Please, use actix_web_validator::Path instead.", since = "2.0.0")]
+pub type ValidatedQuery<T> = Query<T>;
+
+impl<T> AsRef<T> for Query<T> {
     fn as_ref(&self) -> &T {
         &self.0
     }
 }
 
-impl<T> Deref for ValidatedQuery<T> {
+impl<T> Deref for Query<T> {
     type Target = T;
 
     fn deref(&self) -> &T {
@@ -125,25 +128,25 @@ impl<T> Deref for ValidatedQuery<T> {
     }
 }
 
-impl<T> ops::DerefMut for ValidatedQuery<T> {
+impl<T> ops::DerefMut for Query<T> {
     fn deref_mut(&mut self) -> &mut T {
         &mut self.0
     }
 }
 
-impl<T: fmt::Debug> fmt::Debug for ValidatedQuery<T> {
+impl<T: fmt::Debug> fmt::Debug for Query<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.0.fmt(f)
     }
 }
 
-impl<T: fmt::Display> fmt::Display for ValidatedQuery<T> {
+impl<T: fmt::Display> fmt::Display for Query<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.0.fmt(f)
     }
 }
 
-impl<T> ValidatedQuery<T>
+impl<T> Query<T>
 where
     T: Validate,
 {
@@ -160,7 +163,7 @@ where
 /// ```rust
 /// use actix_web::{web, App};
 /// use serde_derive::Deserialize;
-/// use actix_web_validator::ValidatedQuery;
+/// use actix_web_validator::Query;
 /// use validator::Validate;
 /// use validator_derive::Validate;
 ///
@@ -190,7 +193,7 @@ where
 ///        web::resource("/index.html").route(web::get().to(index))); // <- use `Query` extractor
 /// }
 /// ```
-impl<T> FromRequest for ValidatedQuery<T>
+impl<T> FromRequest for Query<T>
 where
     T: de::DeserializeOwned + Validate,
 {
@@ -229,7 +232,7 @@ where
                     e.into()
                 }
             })
-            .map(|value| ok(ValidatedQuery(value)))
+            .map(|value| ok(Query(value)))
             .unwrap_or_else(|e| err(e))
     }
 }
