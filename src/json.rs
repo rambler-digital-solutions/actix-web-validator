@@ -3,8 +3,7 @@ use core::fmt::Debug;
 use std::ops::Deref;
 use std::sync::Arc;
 
-use actix_http::Payload;
-use actix_web::dev::JsonBody;
+use actix_web::dev::{JsonBody, Payload};
 use actix_web::FromRequest;
 use actix_web::HttpRequest;
 use futures::future::{FutureExt, LocalBoxFuture};

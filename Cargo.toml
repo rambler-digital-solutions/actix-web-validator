@@ -14,7 +14,6 @@ documentation = "https://docs.rs/actix-web-validator/"
 [dependencies]
 actix-web = "3"
 derive_more = "0.99"
-actix-http = "2"
 validator = "0.11"
 validator_derive = "0.11"
 serde = "1"
