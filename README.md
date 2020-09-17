@@ -31,7 +31,8 @@ actix-web-validator = "1.0.0"
 
 ### Supported `actix_web` versions:
 * For actix-web-validator `< 1.0` supported version of actix-web is `1.*`
-* For actix-web-validator `>= 1.0` supported version of actix-web is `2.*`
+* For actix-web-validator `>= 1.0 ` supported version of actix-web is `2.*`
+* For actix-web-validator `>= 2.0 ` supported version of actix-web is `3.*`
 
 ### Example:
 

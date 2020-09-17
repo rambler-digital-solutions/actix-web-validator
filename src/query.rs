@@ -202,7 +202,7 @@ where
     #[inline]
     fn from_request(
         req: &actix_web::web::HttpRequest,
-        _: &mut actix_http::Payload,
+        _: &mut actix_web::dev::Payload,
     ) -> Self::Future {
         let error_handler = req
             .app_data::<Self::Config>()
