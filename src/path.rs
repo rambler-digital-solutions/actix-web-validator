@@ -22,7 +22,7 @@ use crate::error::{DeserializeErrors, Error};
 /// ```rust
 /// use actix_web::{web, App, Error};
 /// use serde_derive::Deserialize;
-/// use actix_web_validator::ValidatedPath;
+/// use actix_web_validator::Path;
 /// use validator::Validate;
 /// use validator_derive::Validate;
 ///
@@ -33,7 +33,7 @@ use crate::error::{DeserializeErrors, Error};
 /// }
 ///
 /// /// extract `Info` from a path using serde
-/// async fn index(info: ValidatedPath<Info>) -> Result<String, Error> {
+/// async fn index(info: Path<Info>) -> Result<String, Error> {
 ///     Ok(format!("Welcome {}!", info.username))
 /// }
 ///
@@ -45,24 +45,27 @@ use crate::error::{DeserializeErrors, Error};
 /// }
 /// ```
 #[derive(PartialEq, Eq, PartialOrd, Ord)]
-pub struct ValidatedPath<T> {
+pub struct Path<T> {
     inner: T,
 }
 
-impl<T> ValidatedPath<T> {
+#[deprecated(note = "Please, use actix_web_validator::Path instead.", since = "2.0.0")]
+pub type ValidatedPath<T> = Path<T>;
+
+impl<T> Path<T> {
     /// Deconstruct to an inner value
     pub fn into_inner(self) -> T {
         self.inner
     }
 }
 
-impl<T> AsRef<T> for ValidatedPath<T> {
+impl<T> AsRef<T> for Path<T> {
     fn as_ref(&self) -> &T {
         &self.inner
     }
 }
 
-impl<T> Deref for ValidatedPath<T> {
+impl<T> Deref for Path<T> {
     type Target = T;
 
     fn deref(&self) -> &T {
@@ -70,13 +73,13 @@ impl<T> Deref for ValidatedPath<T> {
     }
 }
 
-impl<T: fmt::Debug> fmt::Debug for ValidatedPath<T> {
+impl<T: fmt::Debug> fmt::Debug for Path<T> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         self.inner.fmt(f)
     }
 }
 
-impl<T: fmt::Display> fmt::Display for ValidatedPath<T> {
+impl<T: fmt::Display> fmt::Display for Path<T> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         self.inner.fmt(f)
     }
@@ -92,7 +95,7 @@ impl<T: fmt::Display> fmt::Display for ValidatedPath<T> {
 /// ```rust
 /// use actix_web::{web, App, Error};
 /// use serde_derive::Deserialize;
-/// use actix_web_validator::ValidatedPath;
+/// use actix_web_validator::Path;
 /// use validator::Validate;
 /// use validator_derive::Validate;
 ///
@@ -103,7 +106,7 @@ impl<T: fmt::Display> fmt::Display for ValidatedPath<T> {
 /// }
 ///
 /// /// extract `Info` from a path using serde
-/// async fn index(info: ValidatedPath<Info>) -> Result<String, Error> {
+/// async fn index(info: Path<Info>) -> Result<String, Error> {
 ///     Ok(format!("Welcome {}!", info.username))
 /// }
 ///
@@ -114,7 +117,7 @@ impl<T: fmt::Display> fmt::Display for ValidatedPath<T> {
 ///     );
 /// }
 /// ```
-impl<T> FromRequest for ValidatedPath<T>
+impl<T> FromRequest for Path<T>
 where
     T: DeserializeOwned + Validate,
 {
@@ -137,7 +140,7 @@ where
                         .map(move |_| value)
                         .map_err(Error::Validate)
                 })
-                .map(|inner| ValidatedPath { inner })
+                .map(|inner| Path { inner })
                 .map_err(move |e| {
                     log::debug!(
                         "Failed during Path extractor deserialization. \
@@ -157,7 +160,7 @@ where
 /// Path extractor configuration
 ///
 /// ```rust
-/// use actix_web_validator::{PathConfig, ValidatedPath};
+/// use actix_web_validator::{PathConfig, Path};
 /// use actix_web::{error, web, App, FromRequest, HttpResponse};
 /// use validator::Validate;
 /// use validator_derive::Validate;
@@ -179,7 +182,7 @@ where
 /// }
 ///
 /// // deserialize `Info` from request's path
-/// async fn index(folder: ValidatedPath<Filter>) -> String {
+/// async fn index(folder: Path<Filter>) -> String {
 ///     format!("Selected folder: {:?}!", folder)
 /// }
 ///

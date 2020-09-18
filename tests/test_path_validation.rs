@@ -1,9 +1,8 @@
 use std::fmt;
 
 use actix_web::{error, http::StatusCode, test, test::call_service, web, App, HttpResponse};
-use actix_web_validator::ValidatedPath;
+use actix_web_validator::Path;
 use serde_derive::Deserialize;
-use validator::Validate;
 use validator_derive::Validate;
 
 #[derive(Debug, Validate, Deserialize, PartialEq)]
@@ -18,7 +17,7 @@ impl fmt::Display for PathParams {
     }
 }
 
-async fn test_handler(_query: ValidatedPath<PathParams>) -> HttpResponse {
+async fn test_handler(_query: Path<PathParams>) -> HttpResponse {
     HttpResponse::Ok().finish()
 }
 
@@ -60,7 +59,7 @@ async fn test_custom_path_validation_error() {
 #[actix_rt::test]
 async fn test_deref_validated_path() {
     let mut app = test::init_service(App::new().service(web::resource("/test/{id}/").to(
-        |query: ValidatedPath<PathParams>| {
+        |query: Path<PathParams>| {
             assert_eq!(query.id, 28);
             HttpResponse::Ok().finish()
         },
@@ -73,7 +72,7 @@ async fn test_deref_validated_path() {
 
 #[actix_rt::test]
 async fn test_path_implementation() {
-    async fn test_handler(query: ValidatedPath<PathParams>) -> HttpResponse {
+    async fn test_handler(query: Path<PathParams>) -> HttpResponse {
         let reference = PathParams { id: 28 };
         assert_eq!(format!("{:?}", &reference), format!("{:?}", &query));
         assert_eq!(format!("{}", &reference), format!("{}", &query));

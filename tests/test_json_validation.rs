@@ -1,9 +1,8 @@
 use actix_web::{
     error, http::StatusCode, test, test::call_service, web, App, FromRequest, HttpResponse,
 };
-use actix_web_validator::{JsonConfig, ValidatedJson};
+use actix_web_validator::{JsonConfig, Json};
 use serde_derive::{Deserialize, Serialize};
-use validator::Validate;
 use validator_derive::Validate;
 
 #[derive(Debug, PartialEq, Validate, Serialize, Deserialize)]
@@ -14,7 +13,7 @@ struct JsonPayload {
     age: u8,
 }
 
-async fn test_handler(query: ValidatedJson<JsonPayload>) -> HttpResponse {
+async fn test_handler(query: Json<JsonPayload>) -> HttpResponse {
     dbg!(&query.into_inner());
     HttpResponse::Ok().finish()
 }
@@ -54,7 +53,7 @@ async fn test_custom_json_validation_error() {
     let mut app = test::init_service(
         App::new().service(
             web::resource("/test")
-                .app_data(ValidatedJson::<JsonPayload>::configure(|cfg| {
+                .app_data(Json::<JsonPayload>::configure(|cfg| {
                     cfg.error_handler(|err, _req| {
                         error::InternalError::from_response(err, HttpResponse::Conflict().finish())
                             .into()
@@ -80,7 +79,7 @@ async fn test_custom_json_validation_error() {
 #[actix_rt::test]
 async fn test_validated_json_asref_deref() {
     let mut app = test::init_service(App::new().service(web::resource("/test").to(
-        |payload: ValidatedJson<JsonPayload>| {
+        |payload: Json<JsonPayload>| {
             assert_eq!(payload.age, 24);
             let reference = JsonPayload {
                 page_url: "https://my_page.com".to_owned(),
@@ -105,7 +104,7 @@ async fn test_validated_json_asref_deref() {
 #[actix_rt::test]
 async fn test_validated_json_into_inner() {
     let mut app = test::init_service(App::new().service(web::resource("/test").to(
-        |payload: ValidatedJson<JsonPayload>| {
+        |payload: Json<JsonPayload>| {
             let payload = payload.into_inner();
             assert_eq!(payload.age, 24);
             assert_eq!(payload.page_url, "https://my_page.com");
