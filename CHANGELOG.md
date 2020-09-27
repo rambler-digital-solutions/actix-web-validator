@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.1] 2020-09-27
+
 ## [2.0.0] 2020-09-18
 ### Added
 - [#13](https://github.com/rambler-digital-solutions/actix-web-validator/issues/13): Add actix-web 3.x.x support.
