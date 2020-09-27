@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ## [2.0.1] 2020-09-27
+### Fixed 
+- [#15](https://github.com/rambler-digital-solutions/actix-web-validator/issues/15): Disable default features for actix-web dependency. 
 
 ## [2.0.0] 2020-09-18
 ### Added
