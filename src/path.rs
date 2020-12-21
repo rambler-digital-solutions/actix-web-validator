@@ -24,7 +24,6 @@ use crate::error::{DeserializeErrors, Error};
 /// use serde_derive::Deserialize;
 /// use actix_web_validator::Path;
 /// use validator::Validate;
-/// use validator_derive::Validate;
 ///
 /// #[derive(Deserialize, Validate)]
 /// struct Info {
@@ -49,7 +48,10 @@ pub struct Path<T> {
     inner: T,
 }
 
-#[deprecated(note = "Please, use actix_web_validator::Path instead.", since = "2.0.0")]
+#[deprecated(
+    note = "Please, use actix_web_validator::Path instead.",
+    since = "2.0.0"
+)]
 pub type ValidatedPath<T> = Path<T>;
 
 impl<T> Path<T> {
@@ -97,7 +99,6 @@ impl<T: fmt::Display> fmt::Display for Path<T> {
 /// use serde_derive::Deserialize;
 /// use actix_web_validator::Path;
 /// use validator::Validate;
-/// use validator_derive::Validate;
 ///
 /// #[derive(Deserialize, Validate)]
 /// struct Info {
@@ -163,7 +164,6 @@ where
 /// use actix_web_validator::{PathConfig, Path};
 /// use actix_web::{error, web, App, FromRequest, HttpResponse};
 /// use validator::Validate;
-/// use validator_derive::Validate;
 /// use serde_derive::Deserialize;
 ///
 /// #[derive(Deserialize, Debug)]

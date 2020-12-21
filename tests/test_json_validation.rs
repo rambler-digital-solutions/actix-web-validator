@@ -1,9 +1,9 @@
 use actix_web::{
     error, http::StatusCode, test, test::call_service, web, App, FromRequest, HttpResponse,
 };
-use actix_web_validator::{JsonConfig, Json};
+use actix_web_validator::{Json, JsonConfig};
 use serde_derive::{Deserialize, Serialize};
-use validator_derive::Validate;
+use validator::Validate;
 
 #[derive(Debug, PartialEq, Validate, Serialize, Deserialize)]
 struct JsonPayload {
