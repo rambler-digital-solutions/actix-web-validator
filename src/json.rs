@@ -30,7 +30,6 @@ use crate::error::Error;
 /// use actix_web_validator::Json;
 /// use serde_derive::Deserialize;
 /// use validator::Validate;
-/// use validator_derive::Validate;
 ///
 /// #[derive(Deserialize, Validate)]
 /// struct Info {
@@ -53,7 +52,10 @@ use crate::error::Error;
 #[derive(Debug)]
 pub struct Json<T>(pub T);
 
-#[deprecated(note = "Please, use actix_web_validator::Json instead.", since = "2.0.0")]
+#[deprecated(
+    note = "Please, use actix_web_validator::Json instead.",
+    since = "2.0.0"
+)]
 pub type ValidatedJson<T> = Json<T>;
 
 impl<T> Json<T> {
@@ -96,7 +98,6 @@ impl<T> Deref for Json<T> {
 /// use actix_web_validator::Json;
 /// use serde_derive::Deserialize;
 /// use validator::Validate;
-/// use validator_derive::Validate;
 ///
 /// #[derive(Deserialize, Validate)]
 /// struct Info {
@@ -135,10 +136,7 @@ where
         JsonBody::new(req, payload, ctype)
             .limit(limit)
             .map(|res: Result<T, _>| match res {
-                Ok(data) => data
-                    .validate()
-                    .map(|_| Json(data))
-                    .map_err(Error::from),
+                Ok(data) => data.validate().map(|_| Json(data)).map_err(Error::from),
                 Err(e) => Err(Error::from(e)),
             })
             .map(move |res| match res {
@@ -167,7 +165,6 @@ where
 /// use serde_derive::Deserialize;
 /// use actix_web_validator::{Json, JsonConfig};
 /// use validator::Validate;
-/// use validator_derive::Validate;
 ///
 /// #[derive(Deserialize, Validate)]
 /// struct Info {

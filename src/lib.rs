@@ -10,7 +10,6 @@
 //! use serde_derive::Deserialize;
 //! use actix_web_validator::ValidatedQuery;
 //! use validator::Validate;
-//! use validator_derive::Validate;
 //!
 //! #[derive(Debug, Deserialize)]
 //! pub enum ResponseType {

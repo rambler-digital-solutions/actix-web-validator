@@ -17,7 +17,7 @@ use validator::Validate;
 /// use actix_web::{error, web, App, FromRequest, HttpResponse};
 /// use serde_derive::Deserialize;
 /// use actix_web_validator::{Query, QueryConfig};
-/// use validator_derive::Validate;
+/// use validator::Validate;
 ///
 /// #[derive(Deserialize, Validate)]
 /// struct Info {
@@ -78,7 +78,7 @@ impl Default for QueryConfig {
 /// use actix_web::{web, App};
 /// use serde_derive::Deserialize;
 /// use actix_web_validator::Query;
-/// use validator_derive::Validate;
+/// use validator::Validate;
 ///
 /// #[derive(Debug, Deserialize)]
 /// pub enum ResponseType {
@@ -109,7 +109,10 @@ impl Default for QueryConfig {
 #[derive(PartialEq, Eq, PartialOrd, Ord)]
 pub struct Query<T>(pub T);
 
-#[deprecated(note = "Please, use actix_web_validator::Query instead.", since = "2.0.0")]
+#[deprecated(
+    note = "Please, use actix_web_validator::Query instead.",
+    since = "2.0.0"
+)]
 pub type ValidatedQuery<T> = Query<T>;
 
 impl<T> AsRef<T> for Query<T> {
@@ -163,7 +166,6 @@ where
 /// use serde_derive::Deserialize;
 /// use actix_web_validator::Query;
 /// use validator::Validate;
-/// use validator_derive::Validate;
 ///
 /// #[derive(Debug, Deserialize)]
 /// pub enum ResponseType {

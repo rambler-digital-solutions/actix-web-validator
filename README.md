@@ -40,7 +40,7 @@ actix-web-validator = "2.0.1"
 use actix_web::{web, App};
 use serde_derive::Deserialize;
 use actix_web_validator::Query;
-use validator_derive::Validate;
+use validator::Validate;
 
 #[derive(Debug, Deserialize)]
 pub enum ResponseType {
