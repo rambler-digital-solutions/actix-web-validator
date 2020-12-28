@@ -30,9 +30,9 @@ actix-web-validator = "2.0.1"
 * `web::Path`
 
 ### Supported `actix_web` versions:
-* For actix-web-validator `< 1.0` supported version of actix-web is `1.*`
-* For actix-web-validator `>= 1.0 ` supported version of actix-web is `2.*`
-* For actix-web-validator `>= 2.0 ` supported version of actix-web is `3.*`
+* For actix-web-validator `0.*` supported version of actix-web is `1.*`
+* For actix-web-validator `1.* ` supported version of actix-web is `2.*`
+* For actix-web-validator `2.* ` supported version of actix-web is `3.*`
 
 ### Example:
 
