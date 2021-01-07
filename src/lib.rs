@@ -45,3 +45,4 @@ pub use error::Error;
 pub use json::*;
 pub use path::*;
 pub use query::*;
+pub use validator::Validate;
