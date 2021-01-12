@@ -27,9 +27,8 @@ use crate::error::Error;
 ///
 /// ```rust
 /// use actix_web::{web, App};
-/// use actix_web_validator::Json;
+/// use actix_web_validator::{Json, Validate};
 /// use serde_derive::Deserialize;
-/// use validator::Validate;
 ///
 /// #[derive(Deserialize, Validate)]
 /// struct Info {
@@ -95,9 +94,8 @@ impl<T> Deref for Json<T> {
 ///
 /// ```rust
 /// use actix_web::{web, App};
-/// use actix_web_validator::Json;
+/// use actix_web_validator::{Json, Validate};
 /// use serde_derive::Deserialize;
-/// use validator::Validate;
 ///
 /// #[derive(Deserialize, Validate)]
 /// struct Info {
@@ -163,8 +161,7 @@ where
 /// ```rust
 /// use actix_web::{error, web, App, FromRequest, HttpResponse};
 /// use serde_derive::Deserialize;
-/// use actix_web_validator::{Json, JsonConfig};
-/// use validator::Validate;
+/// use actix_web_validator::{Json, JsonConfig, Validate};
 ///
 /// #[derive(Deserialize, Validate)]
 /// struct Info {

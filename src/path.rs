@@ -22,8 +22,7 @@ use crate::error::{DeserializeErrors, Error};
 /// ```rust
 /// use actix_web::{web, App, Error};
 /// use serde_derive::Deserialize;
-/// use actix_web_validator::Path;
-/// use validator::Validate;
+/// use actix_web_validator::{Path, Validate};
 ///
 /// #[derive(Deserialize, Validate)]
 /// struct Info {
@@ -97,8 +96,7 @@ impl<T: fmt::Display> fmt::Display for Path<T> {
 /// ```rust
 /// use actix_web::{web, App, Error};
 /// use serde_derive::Deserialize;
-/// use actix_web_validator::Path;
-/// use validator::Validate;
+/// use actix_web_validator::{Path, Validate};
 ///
 /// #[derive(Deserialize, Validate)]
 /// struct Info {
@@ -161,9 +159,8 @@ where
 /// Path extractor configuration
 ///
 /// ```rust
-/// use actix_web_validator::{PathConfig, Path};
+/// use actix_web_validator::{PathConfig, Path, Validate};
 /// use actix_web::{error, web, App, FromRequest, HttpResponse};
-/// use validator::Validate;
 /// use serde_derive::Deserialize;
 ///
 /// #[derive(Deserialize, Debug)]

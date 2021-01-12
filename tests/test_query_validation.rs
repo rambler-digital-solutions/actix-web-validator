@@ -1,5 +1,5 @@
 use actix_web::{error, http::StatusCode, test, test::call_service, web, App, HttpResponse};
-use actix_web_validator::{Query, Validate};
+use actix_web_validator::{Query, Validate, Error};
 use serde_derive::Deserialize;
 
 #[derive(Debug, Validate, Deserialize, PartialEq)]
@@ -34,6 +34,7 @@ async fn test_custom_query_validation_error() {
         App::new()
             .app_data(
                 actix_web_validator::QueryConfig::default().error_handler(|err, _req| {
+                    assert!(matches!(err, Error::Validate(_)));
                     error::InternalError::from_response(err, HttpResponse::Conflict().finish())
                         .into()
                 }),

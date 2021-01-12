@@ -8,8 +8,7 @@
 //! ```rust
 //! use actix_web::{web, App};
 //! use serde_derive::Deserialize;
-//! use actix_web_validator::ValidatedQuery;
-//! use validator::Validate;
+//! use actix_web_validator::{Query, Validate};
 //!
 //! #[derive(Debug, Deserialize)]
 //! pub enum ResponseType {
@@ -28,7 +27,8 @@
 //! // This handler gets called only if the request's query string contains a `id` and
 //! // `response_type` fields.
 //! // The correct request for this handler would be `/index.html?id=19&response_type=Code"`.
-//! async fn index(web::Query(info): web::Query<AuthRequest>) -> String {
+//! async fn index(info: Query<AuthRequest>) -> String {
+//!     assert!(info.id >= 1000);
 //!     format!("Authorization request for client with id={} and type={:?}!", info.id, info.response_type)
 //! }
 //!

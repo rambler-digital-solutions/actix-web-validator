@@ -39,8 +39,7 @@ actix-web-validator = "2.0.2"
 ```rust
 use actix_web::{web, App};
 use serde_derive::Deserialize;
-use actix_web_validator::Query;
-use validator::Validate;
+use actix_web_validator::{Query, Validate};
 
 #[derive(Debug, Deserialize)]
 pub enum ResponseType {
