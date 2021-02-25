@@ -50,6 +50,18 @@ impl From<validator::ValidationErrors> for Error {
 
 impl ResponseError for Error {
     fn error_response(&self) -> HttpResponse {
-        HttpResponse::build(StatusCode::BAD_REQUEST).body(format!("{{\"message\": {} }}", *self))
+        HttpResponse::build(StatusCode::BAD_REQUEST).body(match self {
+            Self::Validate(e) => format!(
+                "{{\"validation_errors\": {} }}",
+                serde_json::to_string(
+                    &e.errors()
+                        .iter()
+                        .map(|(err, _)| err.to_string())
+                        .collect::<Vec<_>>()
+                )
+                .unwrap_or("\"validation error\"".to_string())
+            ),
+            _ => format!("{{\"message\": \"{}\" }}", *self),
+        })
     }
 }
