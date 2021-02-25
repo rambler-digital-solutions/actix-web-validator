@@ -50,6 +50,6 @@ impl From<validator::ValidationErrors> for Error {
 
 impl ResponseError for Error {
     fn error_response(&self) -> HttpResponse {
-        HttpResponse::new(StatusCode::BAD_REQUEST)
+        HttpResponse::build(StatusCode::BAD_REQUEST).body(format!("{{\"message\": {} }}", *self))
     }
 }
