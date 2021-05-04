@@ -46,4 +46,5 @@ pub use error::Error;
 pub use json::*;
 pub use path::*;
 pub use query::*;
+pub use qsquery::*;
 pub use validator::Validate;
