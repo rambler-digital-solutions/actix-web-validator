@@ -41,6 +41,7 @@ pub mod error;
 mod json;
 mod path;
 mod query;
+mod qsquery;
 pub use error::Error;
 pub use json::*;
 pub use path::*;
