@@ -12,6 +12,8 @@ pub enum Error {
     Deserialize(DeserializeErrors),
     #[display(fmt = "Payload error: {}", _0)]
     JsonPayloadError(actix_web::error::JsonPayloadError),
+    #[display(fmt = "Payload error: {}", _0)]
+    QsError(serde_qs::Error),
 }
 
 #[derive(Display, Debug)]
@@ -27,6 +29,12 @@ pub enum DeserializeErrors {
 impl From<serde_json::error::Error> for Error {
     fn from(error: serde_json::error::Error) -> Self {
         Error::Deserialize(DeserializeErrors::DeserializeJson(error))
+    }
+}
+
+impl From<serde_qs::Error> for Error {
+    fn from(error: serde_qs::Error) -> Self {
+        Error::QsError(error)
     }
 }
 

@@ -24,10 +24,11 @@ This crate works with Cargo and can be found on
 actix-web-validator = "2.0.3"
 ```
 
-## Supported `actix_web::web` extractors:
-* `web::Json`
-* `web::Query`
-* `web::Path`
+## Supported extractors:
+* `actix_web::web::Json`
+* `actix_web::web::Query`
+* `actix_web::web::Path`
+* `serde_qs::actix::QsQuery` 
 
 ### Supported `actix_web` versions:
 * For actix-web-validator `0.*` supported version of actix-web is `1.*`
