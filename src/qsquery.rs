@@ -7,8 +7,8 @@ use std::{fmt, ops};
 use actix_web::{FromRequest, HttpRequest};
 use futures::future::{err, ok, Ready};
 use serde::de;
-use validator::Validate;
 use serde_qs::Config as QsConfig;
+use validator::Validate;
 
 /// Query extractor configuration
 ///
@@ -56,8 +56,8 @@ pub struct QsQueryConfig {
 impl QsQueryConfig {
     /// Set custom error handler
     pub fn error_handler<F>(mut self, f: F) -> Self
-        where
-            F: Fn(Error, &HttpRequest) -> actix_web::Error + Send + Sync + 'static,
+    where
+        F: Fn(Error, &HttpRequest) -> actix_web::Error + Send + Sync + 'static,
     {
         self.ehandler = Some(Arc::new(f));
         self
@@ -213,8 +213,7 @@ where
     ) -> Self::Future {
         let query_config = req.app_data::<QsQueryConfig>();
 
-        let error_handler = query_config.map(|c| c.ehandler.clone())
-            .unwrap_or(None);
+        let error_handler = query_config.map(|c| c.ehandler.clone()).unwrap_or(None);
 
         let default_qsconfig = QsConfig::default();
         let qsconfig = query_config
@@ -243,6 +242,6 @@ where
                 }
             })
             .map(|value| ok(QsQuery(value)))
-            .unwrap_or_else(|e| err(e))
+            .unwrap_or_else(err)
     }
 }

@@ -1,5 +1,5 @@
 use actix_web::{error, http::StatusCode, test, test::call_service, web, App, HttpResponse};
-use actix_web_validator::{Query, Validate, Error};
+use actix_web_validator::{Error, Query, Validate};
 use serde_derive::Deserialize;
 
 #[derive(Debug, Validate, Deserialize, PartialEq)]

@@ -230,6 +230,6 @@ where
                 }
             })
             .map(|value| ok(Query(value)))
-            .unwrap_or_else(|e| err(e))
+            .unwrap_or_else(err)
     }
 }
