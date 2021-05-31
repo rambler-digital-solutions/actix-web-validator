@@ -13,14 +13,10 @@ use validator::Validate;
 /// Query extractor configuration
 ///
 /// ```rust
-/// # #[macro_use] extern crate serde_derive;
-/// # #[cfg(feature = "actix")]
-/// # use actix_web;
-/// # #[cfg(feature = "actix2")]
-/// # use actix_web2 as actix_web;
 /// use actix_web::{error, web, App, FromRequest, HttpResponse};
 /// use serde_qs::actix::QsQuery;
 /// use serde_qs::Config as QsConfig;
+/// use serde::Deserialize;
 ///
 /// #[derive(Deserialize)]
 /// struct Info {
@@ -88,8 +84,9 @@ impl Default for QsQueryConfig {
 ///
 /// ```rust
 /// use actix_web::{web, App};
-/// use serde_derive::Deserialize;
-/// use actix_web_validator::{QsQuery, Validate};
+/// use serde::Deserialize;
+/// use actix_web_validator::QsQuery;
+/// use validator::Validate;
 ///
 /// #[derive(Debug, Deserialize)]
 /// pub enum ResponseType {
@@ -168,8 +165,9 @@ where
 ///
 /// ```rust
 /// use actix_web::{web, App};
-/// use serde_derive::Deserialize;
-/// use actix_web_validator::{QsQuery, Validate};
+/// use serde::Deserialize;
+/// use actix_web_validator::QsQuery;
+/// use validator::Validate;
 ///
 /// #[derive(Debug, Deserialize)]
 /// pub enum ResponseType {

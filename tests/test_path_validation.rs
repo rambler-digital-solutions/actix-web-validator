@@ -1,8 +1,9 @@
 use std::fmt;
 
 use actix_web::{error, http::StatusCode, test, test::call_service, web, App, HttpResponse};
-use actix_web_validator::{Path, Validate};
-use serde_derive::Deserialize;
+use actix_web_validator::Path;
+use serde::Deserialize;
+use validator::Validate;
 
 #[derive(Debug, Validate, Deserialize, PartialEq)]
 struct PathParams {

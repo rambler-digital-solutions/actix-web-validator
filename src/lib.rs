@@ -7,8 +7,9 @@
 //!
 //! ```rust
 //! use actix_web::{web, App};
-//! use serde_derive::Deserialize;
-//! use actix_web_validator::{Query, Validate};
+//! use serde::Deserialize;
+//! use actix_web_validator::Query;
+//! use validator::Validate;
 //!
 //! #[derive(Debug, Deserialize)]
 //! pub enum ResponseType {
@@ -47,4 +48,9 @@ pub use json::*;
 pub use path::*;
 pub use qsquery::*;
 pub use query::*;
+
+#[deprecated(
+    note = "Please explicit use Validate trait or macro from `validator` crate.",
+    since = "2.1.0"
+)]
 pub use validator::Validate;

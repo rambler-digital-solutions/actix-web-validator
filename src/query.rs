@@ -15,8 +15,9 @@ use validator::Validate;
 ///
 /// ```rust
 /// use actix_web::{error, web, App, FromRequest, HttpResponse};
-/// use serde_derive::Deserialize;
-/// use actix_web_validator::{Query, QueryConfig, Validate};
+/// use serde::Deserialize;
+/// use actix_web_validator::{Query, QueryConfig};
+/// use validator::Validate;
 ///
 /// #[derive(Deserialize, Validate)]
 /// struct Info {
@@ -75,8 +76,9 @@ impl Default for QueryConfig {
 ///
 /// ```rust
 /// use actix_web::{web, App};
-/// use serde_derive::Deserialize;
-/// use actix_web_validator::{Query, Validate};
+/// use serde::Deserialize;
+/// use actix_web_validator::Query;
+/// use validator::Validate;
 ///
 /// #[derive(Debug, Deserialize)]
 /// pub enum ResponseType {
@@ -161,8 +163,9 @@ where
 ///
 /// ```rust
 /// use actix_web::{web, App};
-/// use serde_derive::Deserialize;
-/// use actix_web_validator::{Query, Validate};
+/// use serde::Deserialize;
+/// use actix_web_validator::Query;
+/// use validator::Validate;
 ///
 /// #[derive(Debug, Deserialize)]
 /// pub enum ResponseType {
