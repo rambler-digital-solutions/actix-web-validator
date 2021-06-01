@@ -57,6 +57,16 @@ impl From<validator::ValidationErrors> for Error {
 
 impl ResponseError for Error {
     fn error_response(&self) -> HttpResponse {
-        HttpResponse::new(StatusCode::BAD_REQUEST)
+        HttpResponse::build(StatusCode::BAD_REQUEST).body(match self {
+            Self::Validate(e) => format!(
+                "{{\"message\": \"invalid {}\" }}",
+                e.errors()
+                    .iter()
+                    .map(|(err, _)| err.to_string())
+                    .collect::<Vec<_>>()
+                    .join(",")
+            ),
+            _ => format!("{{\"message\": \"{}\" }}", *self),
+        })
     }
 }
