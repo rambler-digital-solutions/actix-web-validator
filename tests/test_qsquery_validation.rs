@@ -1,5 +1,5 @@
 use actix_web::{error, http::StatusCode, test, test::call_service, web, App, HttpResponse};
-use actix_web_validator::{Error, Query};
+use actix_web_validator::{Error, QsQuery};
 use serde::Deserialize;
 use validator::Validate;
 
@@ -9,12 +9,12 @@ struct QueryParams {
     id: u8,
 }
 
-async fn test_handler(_query: Query<QueryParams>) -> HttpResponse {
+async fn test_handler(_query: QsQuery<QueryParams>) -> HttpResponse {
     HttpResponse::Ok().finish()
 }
 
 #[actix_rt::test]
-async fn test_query_validation() {
+async fn test_qsquery_validation() {
     let mut app =
         test::init_service(App::new().service(web::resource("/test").to(test_handler))).await;
 
@@ -30,11 +30,11 @@ async fn test_query_validation() {
 }
 
 #[actix_rt::test]
-async fn test_custom_query_validation_error() {
+async fn test_custom_qsquery_validation_error() {
     let mut app = test::init_service(
         App::new()
             .app_data(
-                actix_web_validator::QueryConfig::default().error_handler(|err, _req| {
+                actix_web_validator::QsQueryConfig::default().error_handler(|err, _req| {
                     assert!(matches!(err, Error::Validate(_)));
                     error::InternalError::from_response(err, HttpResponse::Conflict().finish())
                         .into()
@@ -50,9 +50,9 @@ async fn test_custom_query_validation_error() {
 }
 
 #[actix_rt::test]
-async fn test_deref_validated_query() {
+async fn test_deref_validated_qsquery() {
     let mut app = test::init_service(App::new().service(web::resource("/test").to(
-        |query: Query<QueryParams>| {
+        |query: QsQuery<QueryParams>| {
             assert_eq!(query.id, 28);
             HttpResponse::Ok().finish()
         },
@@ -64,8 +64,8 @@ async fn test_deref_validated_query() {
 }
 
 #[actix_rt::test]
-async fn test_query_implementation() {
-    async fn test_handler(query: Query<QueryParams>) -> HttpResponse {
+async fn test_qsquery_implementation() {
+    async fn test_handler(query: QsQuery<QueryParams>) -> HttpResponse {
         let reference = QueryParams { id: 28 };
         assert_eq!(query.as_ref(), &reference);
         assert_eq!(query.into_inner(), reference);

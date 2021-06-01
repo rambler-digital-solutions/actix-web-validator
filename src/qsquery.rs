@@ -7,50 +7,49 @@ use std::{fmt, ops};
 use actix_web::{FromRequest, HttpRequest};
 use futures::future::{err, ok, Ready};
 use serde::de;
+use serde_qs::Config as QsConfig;
 use validator::Validate;
 
-/// Query extractor configuration.
-///
-/// ## Example
+/// Query extractor configuration
 ///
 /// ```rust
 /// use actix_web::{error, web, App, FromRequest, HttpResponse};
+/// use serde_qs::actix::QsQuery;
+/// use serde_qs::Config as QsConfig;
 /// use serde::Deserialize;
-/// use actix_web_validator::{Query, QueryConfig};
-/// use validator::Validate;
 ///
-/// #[derive(Deserialize, Validate)]
+/// #[derive(Deserialize)]
 /// struct Info {
-///     #[validate(length(min = 1))]
 ///     username: String,
 /// }
 ///
 /// /// deserialize `Info` from request's querystring
-/// async fn index(info: Query<Info>) -> String {
-///     format!("Welcome {}!", info.username)
+/// fn index(info: QsQuery<Info>) -> HttpResponse {
+///     format!("Welcome {}!", info.username).into()
 /// }
 ///
 /// fn main() {
 ///     let app = App::new().service(
-///         web::resource("/index.html")
-///             .app_data(
-///                 // change query extractor configuration
-///                 Query::<Info>::configure(|cfg| {
-///                     cfg.error_handler(|err, req| {  // <- create custom error response
-///                         error::InternalError::from_response(
-///                             err, HttpResponse::Conflict().finish()).into()
-///                     })
-///                 }))
+///         web::resource("/index.html").app_data(
+///             // change query extractor configuration
+///             QsQuery::<Info>::configure(|cfg| {
+///                 cfg.error_handler(|err, req| {  // <- create custom error response
+///                     error::InternalError::from_response(
+///                         err, HttpResponse::Conflict().finish()).into()
+///                 })
+///                 .qs_config(QsConfig::default())
+///             }))
 ///             .route(web::post().to(index))
 ///     );
 /// }
 /// ```
-#[derive(Clone)]
-pub struct QueryConfig {
-    pub ehandler: Option<Arc<dyn Fn(Error, &HttpRequest) -> actix_web::Error + Send + Sync>>,
+
+pub struct QsQueryConfig {
+    ehandler: Option<Arc<dyn Fn(Error, &HttpRequest) -> actix_web::Error + Send + Sync>>,
+    qs_config: QsConfig,
 }
 
-impl QueryConfig {
+impl QsQueryConfig {
     /// Set custom error handler
     pub fn error_handler<F>(mut self, f: F) -> Self
     where
@@ -59,11 +58,20 @@ impl QueryConfig {
         self.ehandler = Some(Arc::new(f));
         self
     }
+
+    /// Set custom serialization parameters
+    pub fn qs_config(mut self, config: QsConfig) -> Self {
+        self.qs_config = config;
+        self
+    }
 }
 
-impl Default for QueryConfig {
+impl Default for QsQueryConfig {
     fn default() -> Self {
-        QueryConfig { ehandler: None }
+        QsQueryConfig {
+            ehandler: None,
+            qs_config: QsConfig::default(),
+        }
     }
 }
 
@@ -77,7 +85,7 @@ impl Default for QueryConfig {
 /// ```rust
 /// use actix_web::{web, App};
 /// use serde::Deserialize;
-/// use actix_web_validator::Query;
+/// use actix_web_validator::QsQuery;
 /// use validator::Validate;
 ///
 /// #[derive(Debug, Deserialize)]
@@ -97,7 +105,7 @@ impl Default for QueryConfig {
 /// // This handler gets called only if the request's query string contains a `id` and
 /// // `response_type` fields.
 /// // The correct request for this handler would be `/index.html?id=1234&response_type=Code"`.
-/// async fn index(info: Query<AuthRequest>) -> String {
+/// async fn index(info: QsQuery<AuthRequest>) -> String {
 ///     format!("Authorization request for client with id={} and type={:?}!", info.id, info.response_type)
 /// }
 ///
@@ -107,21 +115,15 @@ impl Default for QueryConfig {
 /// }
 /// ```
 #[derive(PartialEq, Eq, PartialOrd, Ord)]
-pub struct Query<T>(pub T);
+pub struct QsQuery<T>(pub T);
 
-#[deprecated(
-    note = "Please, use actix_web_validator::Query instead.",
-    since = "2.0.0"
-)]
-pub type ValidatedQuery<T> = Query<T>;
-
-impl<T> AsRef<T> for Query<T> {
+impl<T> AsRef<T> for QsQuery<T> {
     fn as_ref(&self) -> &T {
         &self.0
     }
 }
 
-impl<T> Deref for Query<T> {
+impl<T> Deref for QsQuery<T> {
     type Target = T;
 
     fn deref(&self) -> &T {
@@ -129,25 +131,25 @@ impl<T> Deref for Query<T> {
     }
 }
 
-impl<T> ops::DerefMut for Query<T> {
+impl<T> ops::DerefMut for QsQuery<T> {
     fn deref_mut(&mut self) -> &mut T {
         &mut self.0
     }
 }
 
-impl<T: fmt::Debug> fmt::Debug for Query<T> {
+impl<T: fmt::Debug> fmt::Debug for QsQuery<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.0.fmt(f)
     }
 }
 
-impl<T: fmt::Display> fmt::Display for Query<T> {
+impl<T: fmt::Display> fmt::Display for QsQuery<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.0.fmt(f)
     }
 }
 
-impl<T> Query<T>
+impl<T> QsQuery<T>
 where
     T: Validate,
 {
@@ -164,7 +166,7 @@ where
 /// ```rust
 /// use actix_web::{web, App};
 /// use serde::Deserialize;
-/// use actix_web_validator::Query;
+/// use actix_web_validator::QsQuery;
 /// use validator::Validate;
 ///
 /// #[derive(Debug, Deserialize)]
@@ -184,7 +186,7 @@ where
 /// // This handler gets called only if the request's query string contains a `id` and
 /// // `response_type` fields.
 /// // The correct request for this handler would be `/index.html?id=19&response_type=Code"`.
-/// async fn index(web::Query(info): web::Query<AuthRequest>) -> String {
+/// async fn index(QsQuery(info): QsQuery<AuthRequest>) -> String {
 ///     format!("Authorization request for client with id={} and type={:?}!", info.id, info.response_type)
 /// }
 ///
@@ -193,13 +195,13 @@ where
 ///        web::resource("/index.html").route(web::get().to(index))); // <- use `Query` extractor
 /// }
 /// ```
-impl<T> FromRequest for Query<T>
+impl<T> FromRequest for QsQuery<T>
 where
     T: de::DeserializeOwned + Validate,
 {
     type Error = actix_web::Error;
     type Future = Ready<Result<Self, Self::Error>>;
-    type Config = QueryConfig;
+    type Config = QsQueryConfig;
 
     /// Builds Query struct from request and provides validation mechanism
     #[inline]
@@ -207,12 +209,17 @@ where
         req: &actix_web::web::HttpRequest,
         _: &mut actix_web::dev::Payload,
     ) -> Self::Future {
-        let error_handler = req
-            .app_data::<Self::Config>()
-            .map(|c| c.ehandler.clone())
-            .unwrap_or(None);
+        let query_config = req.app_data::<QsQueryConfig>();
 
-        serde_urlencoded::from_str::<T>(req.query_string())
+        let error_handler = query_config.map(|c| c.ehandler.clone()).unwrap_or(None);
+
+        let default_qsconfig = QsConfig::default();
+        let qsconfig = query_config
+            .map(|c| &c.qs_config)
+            .unwrap_or(&default_qsconfig);
+
+        qsconfig
+            .deserialize_str::<T>(req.query_string())
             .map_err(Error::from)
             .and_then(|value| {
                 value
@@ -232,7 +239,7 @@ where
                     e.into()
                 }
             })
-            .map(|value| ok(Query(value)))
+            .map(|value| ok(QsQuery(value)))
             .unwrap_or_else(err)
     }
 }
