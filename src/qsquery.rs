@@ -1,4 +1,4 @@
-//! Query extractor.
+//! Query extractor (serde_qs based).
 use crate::error::Error;
 use std::ops::Deref;
 use std::sync::Arc;
@@ -10,7 +10,7 @@ use serde::de;
 use serde_qs::Config as QsConfig;
 use validator::Validate;
 
-/// Query extractor configuration
+/// Query extractor configuration (serde_qs based).
 ///
 /// ```rust
 /// use actix_web::{error, web, App, FromRequest, HttpResponse};
@@ -75,10 +75,10 @@ impl Default for QsQueryConfig {
     }
 }
 
-/// Extract and validate typed information from the request's query.
+/// Extract and validate typed information from the request's query (serde_qs based).
 ///
-/// For query decoding uses *serde_urlencoded* crate
-/// [**QueryConfig**](struct.QueryConfig.html) allows to configure extraction process.
+/// For query decoding uses [serde_qs](https://docs.rs/serde_qs/latest/serde_qs/) crate
+/// [`QsQueryConfig`] allows to configure extraction process.
 ///
 /// ## Example
 ///
