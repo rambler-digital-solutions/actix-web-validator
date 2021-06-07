@@ -5,13 +5,13 @@ use derive_more::Display;
 
 #[derive(Display, Debug)]
 pub enum Error {
-    #[display(fmt = "Query validate error: {}", _0)]
+    #[display(fmt = "Validation error: {}", _0)]
     Validate(validator::ValidationErrors),
-    #[display(fmt = "Query validate error: {}", _0)]
+    #[display(fmt = "{}", _0)]
     Deserialize(DeserializeErrors),
     #[display(fmt = "Payload error: {}", _0)]
     JsonPayloadError(actix_web::error::JsonPayloadError),
-    #[display(fmt = "Payload error: {}", _0)]
+    #[display(fmt = "Query error: {}", _0)]
     QsError(serde_qs::Error),
 }
 
@@ -57,6 +57,19 @@ impl From<validator::ValidationErrors> for Error {
 
 impl ResponseError for Error {
     fn error_response(&self) -> HttpResponse {
-        HttpResponse::new(StatusCode::BAD_REQUEST)
+        HttpResponse::build(StatusCode::BAD_REQUEST).body(match self {
+            Self::Validate(e) => format!(
+                "Validation errors in fields:\n{}",
+                e.field_errors()
+                    .iter()
+                    .map(|(field, err)| {
+                        let error = err.first().map(|err| format!("{}", err.code));
+                        format!("\t{}: {}", field, error.unwrap_or_default())
+                    })
+                    .collect::<Vec<_>>()
+                    .join("\n")
+            ),
+            _ => format!("{}", *self),
+        })
     }
 }
