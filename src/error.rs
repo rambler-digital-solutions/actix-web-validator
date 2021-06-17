@@ -64,8 +64,7 @@ impl ResponseError for Error {
                     .iter()
                     .map(|(field, err)| {
                         let error = err.first().map(|err| {
-                            let message = err.message.unwrap_or(err.code.clone());
-                            format!("{}", message)
+                            format!("{}", err.message.as_ref().unwrap_or(&err.code.clone()))
                         });
                         format!("\t{}: {}", field, error.unwrap_or_default())
                     })
