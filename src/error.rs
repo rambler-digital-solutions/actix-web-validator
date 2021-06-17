@@ -63,7 +63,10 @@ impl ResponseError for Error {
                 e.field_errors()
                     .iter()
                     .map(|(field, err)| {
-                        let error = err.first().map(|err| format!("{}", err.code));
+                        let error = err.first().map(|err| {
+                            let message = err.message.unwrap_or(err.code.clone());
+                            format!("{}", message)
+                        });
                         format!("\t{}: {}", field, error.unwrap_or_default())
                     })
                     .collect::<Vec<_>>()
