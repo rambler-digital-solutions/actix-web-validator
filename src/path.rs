@@ -134,14 +134,15 @@ where
             .unwrap_or(None);
         ready(
             Deserialize::deserialize(PathDeserializer::new(req.match_info()))
+                .map(|inner: T| Path{ inner })
                 .map_err(|error| Error::Deserialize(DeserializeErrors::DeserializePath(error)))
-                .and_then(|value: T| {
+                .and_then(|value| {
                     value
+                        .as_ref()
                         .validate()
                         .map(move |_| value)
                         .map_err(Error::Validate)
                 })
-                .map(|inner| Path { inner })
                 .map_err(move |e| {
                     log::debug!(
                         "Failed during Path extractor deserialization. \

@@ -132,8 +132,7 @@ where
             .app_data::<Self::Config>()
             .map(|c| (c.limit, c.ehandler.clone(), c.content_type.clone()))
             .unwrap_or((32768, None, None));
-
-        JsonBody::new(req, payload, ctype)
+        JsonBody::new(req, payload, ctype.as_deref())
             .limit(limit)
             .map(|res: Result<T, _>| match res {
                 Ok(data) => data.validate().map(|_| Json(data)).map_err(Error::from),
