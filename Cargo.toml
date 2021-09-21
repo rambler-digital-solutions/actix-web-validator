@@ -13,6 +13,7 @@ documentation = "https://docs.rs/actix-web-validator/"
 
 [dependencies]
 actix-web = { version = "3", default-features = false }
+actix-http = { version = "2" }
 derive_more = "0.99"
 validator = { version = "0.12" }
 serde = "1"

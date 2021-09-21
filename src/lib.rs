@@ -39,11 +39,13 @@
 //! }
 //! ```
 pub mod error;
+mod form;
 mod json;
 mod path;
 mod qsquery;
 mod query;
 pub use error::Error;
+pub use form::*;
 pub use json::*;
 pub use path::*;
 pub use qsquery::*;
