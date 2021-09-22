@@ -30,6 +30,7 @@ serde = { version = "1", features = ["derive"] }
 * `actix_web::web::Json`
 * `actix_web::web::Query`
 * `actix_web::web::Path`
+* `actix_web::web::Form`
 * `serde_qs::actix::QsQuery` 
 
 ### Supported `actix_web` versions:
