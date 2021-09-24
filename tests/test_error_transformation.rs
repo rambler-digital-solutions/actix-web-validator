@@ -1,6 +1,7 @@
 use actix_web_validator::{error::DeserializeErrors, Error};
 use serde::Deserialize;
 
+#[allow(dead_code)]
 #[derive(Deserialize)]
 struct Query {
     pub test: i32,
