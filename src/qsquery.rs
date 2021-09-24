@@ -14,18 +14,20 @@ use validator::Validate;
 ///
 /// ```rust
 /// use actix_web::{error, web, App, FromRequest, HttpResponse};
-/// use serde_qs::actix::QsQuery;
+/// use actix_web_validator::QsQuery;
 /// use serde_qs::Config as QsConfig;
 /// use serde::Deserialize;
+/// use validator::Validate;
 ///
-/// #[derive(Deserialize)]
+/// #[derive(Deserialize, Validate)]
 /// struct Info {
+///     #[validate(length(min = 3))]
 ///     username: String,
 /// }
 ///
 /// /// deserialize `Info` from request's querystring
-/// fn index(info: QsQuery<Info>) -> HttpResponse {
-///     format!("Welcome {}!", info.username).into()
+/// async fn index(info: QsQuery<Info>) -> String {
+///     format!("Welcome {}!", info.username)
 /// }
 ///
 /// fn main() {
