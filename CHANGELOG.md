@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.0] 2021-10-04
+### Added
+- [#27](https://github.com/rambler-digital-solutions/actix-web-validator/pull/27): Add validation support for Form extractor.
+
 ## [2.1.1] 2021-06-07
 ### Fixed
 - Fix QsQuery and QsQueryConfig documentation.

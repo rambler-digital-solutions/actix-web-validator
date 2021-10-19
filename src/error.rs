@@ -11,6 +11,8 @@ pub enum Error {
     Deserialize(DeserializeErrors),
     #[display(fmt = "Payload error: {}", _0)]
     JsonPayloadError(actix_web::error::JsonPayloadError),
+    #[display(fmt = "Url encoded error: {}", _0)]
+    UrlEncodedError(actix_web::error::UrlencodedError),
     #[display(fmt = "Query error: {}", _0)]
     QsError(serde_qs::Error),
 }
@@ -52,6 +54,12 @@ impl From<actix_web::error::JsonPayloadError> for Error {
 impl From<validator::ValidationErrors> for Error {
     fn from(error: validator::ValidationErrors) -> Self {
         Error::Validate(error)
+    }
+}
+
+impl From<actix_web::error::UrlencodedError> for Error {
+    fn from(error: actix_web::error::UrlencodedError) -> Self {
+        Error::UrlEncodedError(error)
     }
 }
 

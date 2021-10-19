@@ -21,7 +21,7 @@ This crate works with Cargo and can be found on
 
 ```toml
 [dependencies]
-actix-web-validator = "2.1.1"
+actix-web-validator = "2.2.0"
 validator = { version = "0.12", features = ["derive"] }
 serde = { version = "1", features = ["derive"] }
 ```
@@ -30,6 +30,7 @@ serde = { version = "1", features = ["derive"] }
 * `actix_web::web::Json`
 * `actix_web::web::Query`
 * `actix_web::web::Path`
+* `actix_web::web::Form`
 * `serde_qs::actix::QsQuery` 
 
 ### Supported `actix_web` versions:
