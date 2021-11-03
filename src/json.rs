@@ -123,16 +123,15 @@ where
 {
     type Error = actix_web::Error;
     type Future = LocalBoxFuture<'static, Result<Self, Self::Error>>;
-    type Config = JsonConfig;
 
     #[inline]
     fn from_request(req: &HttpRequest, payload: &mut Payload) -> Self::Future {
         let req2 = req.clone();
         let (limit, err, ctype) = req
-            .app_data::<Self::Config>()
+            .app_data::<JsonConfig>()
             .map(|c| (c.limit, c.ehandler.clone(), c.content_type.clone()))
             .unwrap_or((32768, None, None));
-        JsonBody::new(req, payload, ctype.as_deref())
+        JsonBody::new(req, payload, ctype.as_deref(), false)
             .limit(limit)
             .map(|res: Result<T, _>| match res {
                 Ok(data) => data.validate().map(|_| Json(data)).map_err(Error::from),
@@ -181,8 +180,8 @@ where
 ///         web::resource("/index.html")
 ///             .app_data(
 ///                 // change json extractor configuration
-///                 Json::<Info>::configure(|cfg| {
-///                     cfg.limit(4096)
+///                 JsonConfig::default()
+///                        .limit(4096)
 ///                        .content_type(|mime| {  // <- accept text/plain content type
 ///                            mime.type_() == mime::TEXT && mime.subtype() == mime::PLAIN
 ///                        })
@@ -190,7 +189,7 @@ where
 ///                           error::InternalError::from_response(
 ///                               err, HttpResponse::Conflict().finish()).into()
 ///                        })
-///             }))
+///             )
 ///             .route(web::post().to(index))
 ///     );
 /// }

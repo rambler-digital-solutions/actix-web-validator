@@ -4,7 +4,7 @@ use actix_web::{
     test,
     test::call_service,
     web::{self},
-    App, FromRequest, HttpResponse,
+    App, HttpResponse,
 };
 use actix_web_validator::{Form, FormConfig};
 use serde::{Deserialize, Serialize};
@@ -58,11 +58,10 @@ async fn test_custom_form_validation_error() {
     let mut app = test::init_service(
         App::new().service(
             web::resource("/test")
-                .app_data(Form::<FormData>::configure(|cfg| {
-                    cfg.error_handler(|err, _req| {
-                        error::InternalError::from_response(err, HttpResponse::Conflict().finish())
-                            .into()
-                    })
+                .app_data(FormConfig::default().error_handler(|err, _req| {
+                    dbg!("ca passe ici ou pas ?");
+                    error::InternalError::from_response(err, HttpResponse::Conflict().finish())
+                        .into()
                 }))
                 .route(web::post().to(test_handler)),
         ),

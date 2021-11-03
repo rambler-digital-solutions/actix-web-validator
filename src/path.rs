@@ -124,17 +124,16 @@ where
 {
     type Error = actix_web::Error;
     type Future = Ready<Result<Self, Self::Error>>;
-    type Config = PathConfig;
 
     #[inline]
     fn from_request(req: &HttpRequest, _: &mut Payload) -> Self::Future {
         let error_handler = req
-            .app_data::<Self::Config>()
+            .app_data::<PathConfig>()
             .map(|c| c.ehandler.clone())
             .unwrap_or(None);
         ready(
             Deserialize::deserialize(PathDeserializer::new(req.match_info()))
-                .map(|inner: T| Path{ inner })
+                .map(|inner: T| Path { inner })
                 .map_err(|error| Error::Deserialize(DeserializeErrors::DeserializePath(error)))
                 .and_then(|value| {
                     value

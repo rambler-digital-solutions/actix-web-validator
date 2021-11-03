@@ -1,4 +1,4 @@
-use actix_web::{dev::UrlEncoded, FromRequest, HttpRequest, dev::Payload};
+use actix_web::{dev::Payload, dev::UrlEncoded, FromRequest, HttpRequest};
 use futures::future::LocalBoxFuture;
 use futures::FutureExt;
 use serde::de::DeserializeOwned;
@@ -104,13 +104,12 @@ where
 {
     type Error = actix_web::Error;
     type Future = LocalBoxFuture<'static, Result<Self, Self::Error>>;
-    type Config = FormConfig;
 
     #[inline]
     fn from_request(req: &HttpRequest, payload: &mut Payload) -> Self::Future {
         let req2 = req.clone();
         let (limit, error_handler) = req
-            .app_data::<Self::Config>()
+            .app_data::<FormConfig>()
             .map(|c| (c.limit, c.ehandler.clone()))
             .unwrap_or((16_384, None));
 
@@ -158,13 +157,13 @@ where
 ///         web::resource("/index.html")
 ///             .app_data(
 ///                 // change form data extractor configuration
-///                 Form::<Info>::configure(|cfg| {
-///                     cfg.limit(4096)
+///                 FormConfig::default()
+///                        .limit(4096)
 ///                        .error_handler(|err, req| {  // <- create custom error response
 ///                           error::InternalError::from_response(
 ///                               err, HttpResponse::Conflict().finish()).into()
 ///                        })
-///             }))
+///             )
 ///             .route(web::post().to(index))
 ///     );
 /// }

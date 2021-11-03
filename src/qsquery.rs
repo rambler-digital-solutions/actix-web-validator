@@ -14,7 +14,7 @@ use validator::Validate;
 ///
 /// ```rust
 /// use actix_web::{error, web, App, FromRequest, HttpResponse};
-/// use actix_web_validator::QsQuery;
+/// use actix_web_validator::{QsQuery, QsQueryConfig};
 /// use serde_qs::Config as QsConfig;
 /// use serde::Deserialize;
 /// use validator::Validate;
@@ -34,13 +34,13 @@ use validator::Validate;
 ///     let app = App::new().service(
 ///         web::resource("/index.html").app_data(
 ///             // change query extractor configuration
-///             QsQuery::<Info>::configure(|cfg| {
-///                 cfg.error_handler(|err, req| {  // <- create custom error response
+///             QsQueryConfig::default()
+///                    .error_handler(|err, req| {  // <- create custom error response
 ///                     error::InternalError::from_response(
 ///                         err, HttpResponse::Conflict().finish()).into()
 ///                 })
 ///                 .qs_config(QsConfig::default())
-///             }))
+///             )
 ///             .route(web::post().to(index))
 ///     );
 /// }
@@ -203,7 +203,6 @@ where
 {
     type Error = actix_web::Error;
     type Future = Ready<Result<Self, Self::Error>>;
-    type Config = QsQueryConfig;
 
     /// Builds Query struct from request and provides validation mechanism
     #[inline]
