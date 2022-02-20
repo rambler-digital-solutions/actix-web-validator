@@ -21,8 +21,8 @@ This crate works with Cargo and can be found on
 
 ```toml
 [dependencies]
-actix-web-validator = "2.2.0"
-validator = { version = "0.12", features = ["derive"] }
+actix-web-validator = "3.0.0"
+validator = { version = "0.14", features = ["derive"] }
 serde = { version = "1", features = ["derive"] }
 ```
 
@@ -37,6 +37,7 @@ serde = { version = "1", features = ["derive"] }
 * For actix-web-validator `0.*` supported version of actix-web is `1.*`
 * For actix-web-validator `1.* ` supported version of actix-web is `2.*`
 * For actix-web-validator `2.* ` supported version of actix-web is `3.*`
+* For actix-web-validator `3.* ` supported version of actix-web is `4.*`
 
 ### Example:
 
