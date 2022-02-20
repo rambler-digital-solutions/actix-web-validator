@@ -21,7 +21,7 @@ async fn test_handler(_query: Path<PathParams>) -> HttpResponse {
     HttpResponse::Ok().finish()
 }
 
-#[actix_rt::test]
+#[actix_web::test]
 async fn test_path_validation() {
     let mut app =
         test::init_service(App::new().service(web::resource("/test/{id}/").to(test_handler))).await;
@@ -37,7 +37,7 @@ async fn test_path_validation() {
     assert_eq!(resp.status(), StatusCode::OK);
 }
 
-#[actix_rt::test]
+#[actix_web::test]
 async fn test_custom_path_validation_error() {
     let mut app = test::init_service(
         App::new()
@@ -56,12 +56,14 @@ async fn test_custom_path_validation_error() {
     assert_eq!(resp.status(), StatusCode::CONFLICT);
 }
 
-#[actix_rt::test]
+#[actix_web::test]
 async fn test_deref_validated_path() {
     let mut app = test::init_service(App::new().service(web::resource("/test/{id}/").to(
         |query: Path<PathParams>| {
-            assert_eq!(query.id, 28);
-            HttpResponse::Ok().finish()
+            async move {
+                assert_eq!(query.id, 28);
+                HttpResponse::Ok().finish()
+            }
         },
     )))
     .await;
@@ -70,7 +72,7 @@ async fn test_deref_validated_path() {
     call_service(&mut app, req).await;
 }
 
-#[actix_rt::test]
+#[actix_web::test]
 async fn test_path_implementation() {
     async fn test_handler(query: Path<PathParams>) -> HttpResponse {
         let reference = PathParams { id: 28 };

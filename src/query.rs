@@ -31,21 +31,18 @@ use validator::Validate;
 /// }
 ///
 /// fn main() {
+///     let query_config = QueryConfig::default()
+///         .error_handler(|err, req| {  // <- create custom error response
+///             error::InternalError::from_response(err, HttpResponse::Conflict().finish()).into()
+///         });
 ///     let app = App::new().service(
 ///         web::resource("/index.html")
-///             .app_data(
-///                 // change query extractor configuration
-///                 Query::<Info>::configure(|cfg| {
-///                     cfg.error_handler(|err, req| {  // <- create custom error response
-///                         error::InternalError::from_response(
-///                             err, HttpResponse::Conflict().finish()).into()
-///                     })
-///                 }))
+///             .app_data(query_config)
 ///             .route(web::post().to(index))
 ///     );
 /// }
 /// ```
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct QueryConfig {
     pub ehandler: Option<Arc<dyn Fn(Error, &HttpRequest) -> actix_web::Error + Send + Sync>>,
 }
@@ -58,12 +55,6 @@ impl QueryConfig {
     {
         self.ehandler = Some(Arc::new(f));
         self
-    }
-}
-
-impl Default for QueryConfig {
-    fn default() -> Self {
-        QueryConfig { ehandler: None }
     }
 }
 
@@ -199,7 +190,6 @@ where
 {
     type Error = actix_web::Error;
     type Future = Ready<Result<Self, Self::Error>>;
-    type Config = QueryConfig;
 
     /// Builds Query struct from request and provides validation mechanism
     #[inline]
@@ -208,7 +198,7 @@ where
         _: &mut actix_web::dev::Payload,
     ) -> Self::Future {
         let error_handler = req
-            .app_data::<Self::Config>()
+            .app_data::<QueryConfig>()
             .map(|c| c.ehandler.clone())
             .unwrap_or(None);
 

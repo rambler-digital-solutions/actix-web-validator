@@ -14,6 +14,7 @@ use validator::Validate;
 ///
 /// ```rust
 /// use actix_web::{error, web, App, FromRequest, HttpResponse};
+/// use actix_web_validator::QsQueryConfig;
 /// use serde_qs::actix::QsQuery;
 /// use serde_qs::Config as QsConfig;
 /// use serde::Deserialize;
@@ -24,26 +25,24 @@ use validator::Validate;
 /// }
 ///
 /// /// deserialize `Info` from request's querystring
-/// fn index(info: QsQuery<Info>) -> HttpResponse {
-///     format!("Welcome {}!", info.username).into()
+/// async fn index(info: QsQuery<Info>) -> String {
+///     format!("Welcome {}!", info.username)
 /// }
 ///
 /// fn main() {
+///     let qs_query_config = QsQueryConfig::default()
+///         .error_handler(|err, req| {  // <- create custom error response
+///             error::InternalError::from_response(err, HttpResponse::Conflict().finish()).into()
+///         })
+///         .qs_config(QsConfig::default());
 ///     let app = App::new().service(
-///         web::resource("/index.html").app_data(
-///             // change query extractor configuration
-///             QsQuery::<Info>::configure(|cfg| {
-///                 cfg.error_handler(|err, req| {  // <- create custom error response
-///                     error::InternalError::from_response(
-///                         err, HttpResponse::Conflict().finish()).into()
-///                 })
-///                 .qs_config(QsConfig::default())
-///             }))
+///         web::resource("/index.html").app_data(qs_query_config)
 ///             .route(web::post().to(index))
 ///     );
 /// }
 /// ```
 
+#[derive(Default)]
 pub struct QsQueryConfig {
     ehandler: Option<Arc<dyn Fn(Error, &HttpRequest) -> actix_web::Error + Send + Sync>>,
     qs_config: QsConfig,
@@ -63,15 +62,6 @@ impl QsQueryConfig {
     pub fn qs_config(mut self, config: QsConfig) -> Self {
         self.qs_config = config;
         self
-    }
-}
-
-impl Default for QsQueryConfig {
-    fn default() -> Self {
-        QsQueryConfig {
-            ehandler: None,
-            qs_config: QsConfig::default(),
-        }
     }
 }
 
@@ -201,7 +191,6 @@ where
 {
     type Error = actix_web::Error;
     type Future = Ready<Result<Self, Self::Error>>;
-    type Config = QsQueryConfig;
 
     /// Builds Query struct from request and provides validation mechanism
     #[inline]

@@ -124,12 +124,11 @@ where
 {
     type Error = actix_web::Error;
     type Future = Ready<Result<Self, Self::Error>>;
-    type Config = PathConfig;
 
     #[inline]
     fn from_request(req: &HttpRequest, _: &mut Payload) -> Self::Future {
         let error_handler = req
-            .app_data::<Self::Config>()
+            .app_data::<PathConfig>()
             .map(|c| c.ehandler.clone())
             .unwrap_or(None);
         ready(
@@ -200,7 +199,7 @@ where
 ///     );
 /// }
 /// ```
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct PathConfig {
     ehandler: Option<Arc<dyn Fn(Error, &HttpRequest) -> actix_web::Error + Send + Sync>>,
 }
@@ -213,11 +212,5 @@ impl PathConfig {
     {
         self.ehandler = Some(Arc::new(f));
         self
-    }
-}
-
-impl Default for PathConfig {
-    fn default() -> Self {
-        Self { ehandler: None }
     }
 }
