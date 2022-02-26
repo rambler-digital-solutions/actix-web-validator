@@ -194,7 +194,7 @@ where
     /// Builds Query struct from request and provides validation mechanism
     #[inline]
     fn from_request(
-        req: &actix_web::web::HttpRequest,
+        req: &actix_web::HttpRequest,
         _: &mut actix_web::dev::Payload,
     ) -> Self::Future {
         let error_handler = req
