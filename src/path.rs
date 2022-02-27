@@ -48,12 +48,6 @@ pub struct Path<T> {
     inner: T,
 }
 
-#[deprecated(
-    note = "Please, use actix_web_validator::Path instead.",
-    since = "2.0.0"
-)]
-pub type ValidatedPath<T> = Path<T>;
-
 impl<T> Path<T> {
     /// Deconstruct to an inner value
     pub fn into_inner(self) -> T {

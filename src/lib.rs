@@ -50,9 +50,3 @@ pub use json::*;
 pub use path::*;
 pub use qsquery::*;
 pub use query::*;
-
-#[deprecated(
-    note = "Please explicit use Validate trait or macro from `validator` crate.",
-    since = "2.1.0"
-)]
-pub use validator::Validate;

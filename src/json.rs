@@ -52,12 +52,6 @@ use crate::error::Error;
 #[derive(Debug)]
 pub struct Json<T>(pub T);
 
-#[deprecated(
-note = "Please, use actix_web_validator::Json instead.",
-since = "2.0.0"
-)]
-pub type ValidatedJson<T> = Json<T>;
-
 impl<T> Json<T> {
     /// Deconstruct to an inner value
     pub fn into_inner(self) -> T {

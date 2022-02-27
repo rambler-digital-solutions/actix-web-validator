@@ -100,12 +100,6 @@ impl QueryConfig {
 #[derive(PartialEq, Eq, PartialOrd, Ord)]
 pub struct Query<T>(pub T);
 
-#[deprecated(
-    note = "Please, use actix_web_validator::Query instead.",
-    since = "2.0.0"
-)]
-pub type ValidatedQuery<T> = Query<T>;
-
 impl<T> AsRef<T> for Query<T> {
     fn as_ref(&self) -> &T {
         &self.0
