@@ -5,3 +5,4 @@ Cargo.lock
 tarpaulin-report.html
 
 .idea
+.vscode
