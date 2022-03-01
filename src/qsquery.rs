@@ -206,10 +206,7 @@ where
 
     /// Builds Query struct from request and provides validation mechanism
     #[inline]
-    fn from_request(
-        req: &actix_web::web::HttpRequest,
-        _: &mut actix_web::dev::Payload,
-    ) -> Self::Future {
+    fn from_request(req: &actix_web::HttpRequest, _: &mut actix_web::dev::Payload) -> Self::Future {
         let query_config = req.app_data::<QsQueryConfig>();
 
         let error_handler = query_config.map(|c| c.ehandler.clone()).unwrap_or(None);

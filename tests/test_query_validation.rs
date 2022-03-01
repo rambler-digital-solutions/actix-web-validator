@@ -13,7 +13,7 @@ async fn test_handler(_query: Query<QueryParams>) -> HttpResponse {
     HttpResponse::Ok().finish()
 }
 
-#[actix_rt::test]
+#[actix_web::test]
 async fn test_query_validation() {
     let mut app =
         test::init_service(App::new().service(web::resource("/test").to(test_handler))).await;
@@ -29,7 +29,7 @@ async fn test_query_validation() {
     assert_eq!(resp.status(), StatusCode::OK);
 }
 
-#[actix_rt::test]
+#[actix_web::test]
 async fn test_custom_query_validation_error() {
     let mut app = test::init_service(
         App::new()
@@ -49,10 +49,10 @@ async fn test_custom_query_validation_error() {
     assert_eq!(resp.status(), StatusCode::CONFLICT);
 }
 
-#[actix_rt::test]
+#[actix_web::test]
 async fn test_deref_validated_query() {
     let mut app = test::init_service(App::new().service(web::resource("/test").to(
-        |query: Query<QueryParams>| {
+        |query: Query<QueryParams>| async move {
             assert_eq!(query.id, 28);
             HttpResponse::Ok().finish()
         },
@@ -63,7 +63,7 @@ async fn test_deref_validated_query() {
     call_service(&mut app, req).await;
 }
 
-#[actix_rt::test]
+#[actix_web::test]
 async fn test_query_implementation() {
     async fn test_handler(query: Query<QueryParams>) -> HttpResponse {
         let reference = QueryParams { id: 28 };

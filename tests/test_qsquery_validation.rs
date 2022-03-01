@@ -13,7 +13,7 @@ async fn test_handler(_query: QsQuery<QueryParams>) -> HttpResponse {
     HttpResponse::Ok().finish()
 }
 
-#[actix_rt::test]
+#[actix_web::test]
 async fn test_qsquery_validation() {
     let mut app =
         test::init_service(App::new().service(web::resource("/test").to(test_handler))).await;
@@ -29,7 +29,7 @@ async fn test_qsquery_validation() {
     assert_eq!(resp.status(), StatusCode::OK);
 }
 
-#[actix_rt::test]
+#[actix_web::test]
 async fn test_custom_qsquery_validation_error() {
     let mut app = test::init_service(
         App::new()
@@ -49,10 +49,10 @@ async fn test_custom_qsquery_validation_error() {
     assert_eq!(resp.status(), StatusCode::CONFLICT);
 }
 
-#[actix_rt::test]
+#[actix_web::test]
 async fn test_deref_validated_qsquery() {
     let mut app = test::init_service(App::new().service(web::resource("/test").to(
-        |query: QsQuery<QueryParams>| {
+        |query: QsQuery<QueryParams>| async move {
             assert_eq!(query.id, 28);
             HttpResponse::Ok().finish()
         },
@@ -63,7 +63,7 @@ async fn test_deref_validated_qsquery() {
     call_service(&mut app, req).await;
 }
 
-#[actix_rt::test]
+#[actix_web::test]
 async fn test_qsquery_implementation() {
     async fn test_handler(query: QsQuery<QueryParams>) -> HttpResponse {
         let reference = QueryParams { id: 28 };
