@@ -103,15 +103,14 @@ impl<T> FromRequest for Form<T>
 where
     T: DeserializeOwned + Validate + 'static,
 {
-    type Error = actix_http::Error;
+    type Error = actix_web::Error;
     type Future = LocalBoxFuture<'static, Result<Self, Self::Error>>;
-    type Config = FormConfig;
 
     #[inline]
     fn from_request(req: &HttpRequest, payload: &mut Payload) -> Self::Future {
         let req2 = req.clone();
         let (limit, error_handler) = req
-            .app_data::<Self::Config>()
+            .app_data::<FormConfig>()
             .map(|c| (c.limit, c.ehandler.clone()))
             .unwrap_or((16_384, None));
 
@@ -155,17 +154,14 @@ where
 /// }
 ///
 /// fn main() {
+///     let form_config = FormConfig::default()
+///         .limit(4096)
+///         .error_handler(|err, req| {  // <- create custom error response
+///             error::InternalError::from_response(err, HttpResponse::Conflict().finish()).into()
+///         });
 ///     let app = App::new().service(
 ///         web::resource("/index.html")
-///             .app_data(
-///                 // change form data extractor configuration
-///                 Form::<Info>::configure(|cfg| {
-///                     cfg.limit(4096)
-///                        .error_handler(|err, req| {  // <- create custom error response
-///                           error::InternalError::from_response(
-///                               err, HttpResponse::Conflict().finish()).into()
-///                        })
-///             }))
+///             .app_data(form_config)
 ///             .route(web::post().to(index))
 ///     );
 /// }
@@ -173,7 +169,7 @@ where
 #[derive(Clone)]
 pub struct FormConfig {
     limit: usize,
-    ehandler: Option<Rc<dyn Fn(Error, &HttpRequest) -> actix_http::Error>>,
+    ehandler: Option<Rc<dyn Fn(Error, &HttpRequest) -> actix_web::Error>>,
 }
 
 impl FormConfig {
@@ -186,7 +182,7 @@ impl FormConfig {
     /// Set custom error handler
     pub fn error_handler<F>(mut self, f: F) -> Self
     where
-        F: Fn(Error, &HttpRequest) -> actix_http::Error + 'static,
+        F: Fn(Error, &HttpRequest) -> actix_web::Error + 'static,
     {
         self.ehandler = Some(Rc::new(f));
         self

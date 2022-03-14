@@ -52,12 +52,6 @@ use crate::error::Error;
 #[derive(Debug)]
 pub struct Json<T>(pub T);
 
-#[deprecated(
-    note = "Please, use actix_web_validator::Json instead.",
-    since = "2.0.0"
-)]
-pub type ValidatedJson<T> = Json<T>;
-
 impl<T> Json<T> {
     /// Deconstruct to an inner value
     pub fn into_inner(self) -> T {
@@ -118,22 +112,21 @@ impl<T> Deref for Json<T> {
 /// }
 /// ```
 impl<T> FromRequest for Json<T>
-where
-    T: DeserializeOwned + Validate + 'static,
+    where
+        T: DeserializeOwned + Validate + 'static,
 {
     type Error = actix_web::Error;
     type Future = LocalBoxFuture<'static, Result<Self, Self::Error>>;
-    type Config = JsonConfig;
 
     #[inline]
     fn from_request(req: &HttpRequest, payload: &mut Payload) -> Self::Future {
         let req2 = req.clone();
         let (limit, err, ctype) = req
-            .app_data::<Self::Config>()
+            .app_data::<JsonConfig>()
             .map(|c| (c.limit, c.ehandler.clone(), c.content_type.clone()))
             .unwrap_or((32768, None, None));
 
-        JsonBody::new(req, payload, ctype)
+        JsonBody::new(req, payload, ctype.as_deref(), false)
             .limit(limit)
             .map(|res: Result<T, _>| match res {
                 Ok(data) => data.validate().map(|_| Json(data)).map_err(Error::from),
@@ -178,20 +171,16 @@ where
 /// }
 ///
 /// fn main() {
+///     let json_config = JsonConfig::default().limit(4096)
+///         .content_type(|mime| {  // <- accept text/plain content type
+///             mime.type_() == mime::TEXT && mime.subtype() == mime::PLAIN
+///         })
+///         .error_handler(|err, req| {  // <- create custom error response
+///             error::InternalError::from_response(err, HttpResponse::Conflict().finish()).into()
+///         });
 ///     let app = App::new().service(
 ///         web::resource("/index.html")
-///             .app_data(
-///                 // change json extractor configuration
-///                 Json::<Info>::configure(|cfg| {
-///                     cfg.limit(4096)
-///                        .content_type(|mime| {  // <- accept text/plain content type
-///                            mime.type_() == mime::TEXT && mime.subtype() == mime::PLAIN
-///                        })
-///                        .error_handler(|err, req| {  // <- create custom error response
-///                           error::InternalError::from_response(
-///                               err, HttpResponse::Conflict().finish()).into()
-///                        })
-///             }))
+///             .app_data(json_config)
 ///             .route(web::post().to(index))
 ///     );
 /// }
@@ -212,8 +201,8 @@ impl JsonConfig {
 
     /// Set custom error handler
     pub fn error_handler<F>(mut self, f: F) -> Self
-    where
-        F: Fn(Error, &HttpRequest) -> actix_web::Error + Send + Sync + 'static,
+        where
+            F: Fn(Error, &HttpRequest) -> actix_web::Error + Send + Sync + 'static,
     {
         self.ehandler = Some(Arc::new(f));
         self
@@ -221,8 +210,8 @@ impl JsonConfig {
 
     /// Set predicate for allowed content types
     pub fn content_type<F>(mut self, predicate: F) -> Self
-    where
-        F: Fn(mime::Mime) -> bool + Send + Sync + 'static,
+        where
+            F: Fn(mime::Mime) -> bool + Send + Sync + 'static,
     {
         self.content_type = Some(Arc::new(predicate));
         self

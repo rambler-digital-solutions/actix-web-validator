@@ -1,5 +1,5 @@
 use actix_web::{
-    error, http::StatusCode, test, test::call_service, web, App, FromRequest, HttpResponse,
+    error, http::StatusCode, test, test::call_service, web, App, HttpResponse,
 };
 use actix_web_validator::{Json, JsonConfig};
 use serde::{Deserialize, Serialize};
@@ -18,7 +18,7 @@ async fn test_handler(query: Json<JsonPayload>) -> HttpResponse {
     HttpResponse::Ok().finish()
 }
 
-#[actix_rt::test]
+#[actix_web::test]
 async fn test_json_validation() {
     let mut app = test::init_service(
         App::new().service(web::resource("/test").route(web::post().to(test_handler))),
@@ -48,17 +48,16 @@ async fn test_json_validation() {
     assert_eq!(resp.status(), StatusCode::BAD_REQUEST);
 }
 
-#[actix_rt::test]
+#[actix_web::test]
 async fn test_custom_json_validation_error() {
+    let json_config = JsonConfig::default().error_handler(|err, _req| {
+        error::InternalError::from_response(err, HttpResponse::Conflict().finish())
+            .into()
+    });
     let mut app = test::init_service(
         App::new().service(
             web::resource("/test")
-                .app_data(Json::<JsonPayload>::configure(|cfg| {
-                    cfg.error_handler(|err, _req| {
-                        error::InternalError::from_response(err, HttpResponse::Conflict().finish())
-                            .into()
-                    })
-                }))
+                .app_data(json_config)
                 .route(web::post().to(test_handler)),
         ),
     )
@@ -76,10 +75,10 @@ async fn test_custom_json_validation_error() {
     assert_eq!(resp.status(), StatusCode::CONFLICT);
 }
 
-#[actix_rt::test]
+#[actix_web::test]
 async fn test_validated_json_asref_deref() {
     let mut app = test::init_service(App::new().service(web::resource("/test").to(
-        |payload: Json<JsonPayload>| {
+        |payload: Json<JsonPayload>| async move {
             assert_eq!(payload.age, 24);
             let reference = JsonPayload {
                 page_url: "https://my_page.com".to_owned(),
@@ -101,10 +100,10 @@ async fn test_validated_json_asref_deref() {
     call_service(&mut app, req).await;
 }
 
-#[actix_rt::test]
+#[actix_web::test]
 async fn test_validated_json_into_inner() {
     let mut app = test::init_service(App::new().service(web::resource("/test").to(
-        |payload: Json<JsonPayload>| {
+        |payload: Json<JsonPayload>| async {
             let payload = payload.into_inner();
             assert_eq!(payload.age, 24);
             assert_eq!(payload.page_url, "https://my_page.com");
@@ -123,7 +122,7 @@ async fn test_validated_json_into_inner() {
     call_service(&mut app, req).await;
 }
 
-#[actix_rt::test]
+#[actix_web::test]
 async fn test_validated_json_limit() {
     let mut app = test::init_service(
         App::new()

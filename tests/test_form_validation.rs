@@ -4,7 +4,7 @@ use actix_web::{
     test,
     test::call_service,
     web::{self},
-    App, FromRequest, HttpResponse,
+    App, HttpResponse,
 };
 use actix_web_validator::{Form, FormConfig};
 use serde::{Deserialize, Serialize};
@@ -23,7 +23,7 @@ async fn test_handler(query: Form<FormData>) -> HttpResponse {
     HttpResponse::Ok().finish()
 }
 
-#[actix_rt::test]
+#[actix_web::test]
 async fn test_form_validation() {
     let mut app = test::init_service(
         App::new().service(web::resource("/test").route(web::post().to(test_handler))),
@@ -53,17 +53,16 @@ async fn test_form_validation() {
     assert_eq!(resp.status(), StatusCode::BAD_REQUEST);
 }
 
-#[actix_rt::test]
+#[actix_web::test]
 async fn test_custom_form_validation_error() {
+    let form_config = FormConfig::default().error_handler(|err, _req| {
+        error::InternalError::from_response(err, HttpResponse::Conflict().finish())
+            .into()
+    });
     let mut app = test::init_service(
         App::new().service(
             web::resource("/test")
-                .app_data(Form::<FormData>::configure(|cfg| {
-                    cfg.error_handler(|err, _req| {
-                        error::InternalError::from_response(err, HttpResponse::Conflict().finish())
-                            .into()
-                    })
-                }))
+                .app_data(form_config)
                 .route(web::post().to(test_handler)),
         ),
     )
@@ -81,17 +80,19 @@ async fn test_custom_form_validation_error() {
     assert_eq!(resp.status(), StatusCode::CONFLICT);
 }
 
-#[actix_rt::test]
+#[actix_web::test]
 async fn test_validated_form_asref_deref() {
     let mut app = test::init_service(App::new().service(web::resource("/test").to(
         |payload: Form<FormData>| {
-            assert_eq!(payload.age, 24);
-            let reference = FormData {
-                page_url: "https://my_page.com".to_owned(),
-                age: 24,
-            };
-            assert_eq!(payload.as_ref(), &reference);
-            HttpResponse::Ok().finish()
+            async move {
+                assert_eq!(payload.age, 24);
+                let reference = FormData {
+                    page_url: "https://my_page.com".to_owned(),
+                    age: 24,
+                };
+                assert_eq!(payload.as_ref(), &reference);
+                HttpResponse::Ok().finish()
+            }
         },
     )))
     .await;
@@ -106,10 +107,10 @@ async fn test_validated_form_asref_deref() {
     call_service(&mut app, req).await;
 }
 
-#[actix_rt::test]
+#[actix_web::test]
 async fn test_validated_form_into_inner() {
     let mut app = test::init_service(App::new().service(web::resource("/test").to(
-        |payload: Form<FormData>| {
+        |payload: Form<FormData>| async {
             let payload = payload.into_inner();
             assert_eq!(payload.age, 24);
             assert_eq!(payload.page_url, "https://my_page.com");
@@ -128,7 +129,7 @@ async fn test_validated_form_into_inner() {
     call_service(&mut app, req).await;
 }
 
-#[actix_rt::test]
+#[actix_web::test]
 async fn test_validated_form_limit() {
     let mut app = test::init_service(
         App::new()

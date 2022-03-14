@@ -3,8 +3,8 @@ use serde::Deserialize;
 
 #[derive(Deserialize)]
 struct Query {
-    pub test: i32,
-    pub value: i32,
+    test: i32,
+    value: i32,
 }
 
 #[test]
