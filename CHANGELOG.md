@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ## [3.0.0] 2022-03-15
+### Added 
+- [#29](https://github.com/rambler-digital-solutions/actix-web-validator/pull/29): Add actix-web 4.x support.
+
+### Changed
+- Rust edition changed to 2021.
+
+### Removed
+- [#29](https://github.com/rambler-digital-solutions/actix-web-validator/pull/29): ValidatedJson ValidatedQuery and ValidatedPath now removed.
 
 ## [2.2.0] 2021-10-04
 ### Added
