@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.0] 2022-03-15
+
 ## [2.2.0] 2021-10-04
 ### Added
 - [#27](https://github.com/rambler-digital-solutions/actix-web-validator/pull/27): Add validation support for Form extractor.
