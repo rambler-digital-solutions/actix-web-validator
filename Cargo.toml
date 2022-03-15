@@ -2,7 +2,7 @@
 name = "actix-web-validator"
 version = "3.0.0-alpha.0"
 authors = ["Belousow Makc <lib.bmw@gmail.com>", "Andrey Ermilov <andrerm@ya.ru>", "Kolomatskiy Artem <kolomatskiy@bk.ru>"]
-edition = "2018"
+edition = "2021"
 description = "Validation mechanism for actix-web"
 keywords = ["actix-web", "serialization", "querystring", "validator", "validation"]
 categories = ["encoding", "web-programming"]
