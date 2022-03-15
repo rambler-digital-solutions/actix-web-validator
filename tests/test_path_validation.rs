@@ -59,11 +59,9 @@ async fn test_custom_path_validation_error() {
 #[actix_web::test]
 async fn test_deref_validated_path() {
     let mut app = test::init_service(App::new().service(web::resource("/test/{id}/").to(
-        |query: Path<PathParams>| {
-            async move {
-                assert_eq!(query.id, 28);
-                HttpResponse::Ok().finish()
-            }
+        |query: Path<PathParams>| async move {
+            assert_eq!(query.id, 28);
+            HttpResponse::Ok().finish()
         },
     )))
     .await;

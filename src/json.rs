@@ -112,8 +112,8 @@ impl<T> Deref for Json<T> {
 /// }
 /// ```
 impl<T> FromRequest for Json<T>
-    where
-        T: DeserializeOwned + Validate + 'static,
+where
+    T: DeserializeOwned + Validate + 'static,
 {
     type Error = actix_web::Error;
     type Future = LocalBoxFuture<'static, Result<Self, Self::Error>>;
@@ -201,8 +201,8 @@ impl JsonConfig {
 
     /// Set custom error handler
     pub fn error_handler<F>(mut self, f: F) -> Self
-        where
-            F: Fn(Error, &HttpRequest) -> actix_web::Error + Send + Sync + 'static,
+    where
+        F: Fn(Error, &HttpRequest) -> actix_web::Error + Send + Sync + 'static,
     {
         self.ehandler = Some(Arc::new(f));
         self
@@ -210,8 +210,8 @@ impl JsonConfig {
 
     /// Set predicate for allowed content types
     pub fn content_type<F>(mut self, predicate: F) -> Self
-        where
-            F: Fn(mime::Mime) -> bool + Send + Sync + 'static,
+    where
+        F: Fn(mime::Mime) -> bool + Send + Sync + 'static,
     {
         self.content_type = Some(Arc::new(predicate));
         self

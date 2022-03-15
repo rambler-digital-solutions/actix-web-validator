@@ -1,6 +1,4 @@
-use actix_web::{
-    error, http::StatusCode, test, test::call_service, web, App, HttpResponse,
-};
+use actix_web::{error, http::StatusCode, test, test::call_service, web, App, HttpResponse};
 use actix_web_validator::{Json, JsonConfig};
 use serde::{Deserialize, Serialize};
 use validator::Validate;
@@ -51,8 +49,7 @@ async fn test_json_validation() {
 #[actix_web::test]
 async fn test_custom_json_validation_error() {
     let json_config = JsonConfig::default().error_handler(|err, _req| {
-        error::InternalError::from_response(err, HttpResponse::Conflict().finish())
-            .into()
+        error::InternalError::from_response(err, HttpResponse::Conflict().finish()).into()
     });
     let mut app = test::init_service(
         App::new().service(

@@ -52,11 +52,9 @@ async fn test_custom_qsquery_validation_error() {
 #[actix_web::test]
 async fn test_deref_validated_qsquery() {
     let mut app = test::init_service(App::new().service(web::resource("/test").to(
-        |query: QsQuery<QueryParams>| {
-            async move {
-                assert_eq!(query.id, 28);
-                HttpResponse::Ok().finish()
-            }
+        |query: QsQuery<QueryParams>| async move {
+            assert_eq!(query.id, 28);
+            HttpResponse::Ok().finish()
         },
     )))
     .await;

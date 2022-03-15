@@ -56,8 +56,7 @@ async fn test_form_validation() {
 #[actix_web::test]
 async fn test_custom_form_validation_error() {
     let form_config = FormConfig::default().error_handler(|err, _req| {
-        error::InternalError::from_response(err, HttpResponse::Conflict().finish())
-            .into()
+        error::InternalError::from_response(err, HttpResponse::Conflict().finish()).into()
     });
     let mut app = test::init_service(
         App::new().service(
@@ -83,16 +82,14 @@ async fn test_custom_form_validation_error() {
 #[actix_web::test]
 async fn test_validated_form_asref_deref() {
     let mut app = test::init_service(App::new().service(web::resource("/test").to(
-        |payload: Form<FormData>| {
-            async move {
-                assert_eq!(payload.age, 24);
-                let reference = FormData {
-                    page_url: "https://my_page.com".to_owned(),
-                    age: 24,
-                };
-                assert_eq!(payload.as_ref(), &reference);
-                HttpResponse::Ok().finish()
-            }
+        |payload: Form<FormData>| async move {
+            assert_eq!(payload.age, 24);
+            let reference = FormData {
+                page_url: "https://my_page.com".to_owned(),
+                age: 24,
+            };
+            assert_eq!(payload.as_ref(), &reference);
+            HttpResponse::Ok().finish()
         },
     )))
     .await;
