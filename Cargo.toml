@@ -15,7 +15,7 @@ documentation = "https://docs.rs/actix-web-validator/"
 actix-web = { version = "4.0", default-features = false }
 actix-http = { version = "3.0" }
 derive_more = "0.99"
-validator = { version = "0.14" }
+validator = { version = "0.15" }
 serde = "1"
 serde_urlencoded = "0.7"
 serde_json = "1"
@@ -29,6 +29,6 @@ futures-util = "0.3"
 
 [dev-dependencies]
 actix-web = { version = "4.0", default-features = false, features = ["macros"] }
-validator = { version = "0.14", features = ["derive"]}
+validator = { version = "0.15", features = ["derive"]}
 serde = { version = "1", features = ["derive"] }
 actix-service = "2"
