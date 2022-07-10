@@ -134,6 +134,11 @@ mod test {
         .expect("invalid json");
         let validation = params.validate();
         let msg = crate::error::format_errors(&validation.unwrap_err(), None);
-        assert_eq!(msg, "\tpage_params:\n\t\tpage_size: range\n\t\tpage: range\n\tredirect_results: url");
+        assert!(msg.contains("page_params"));
+        assert!(msg.contains("page_size"));
+        assert!(msg.contains("range"));
+        assert!(msg.contains("page"));
+        assert!(msg.contains("redirect_results"));
+        assert!(msg.contains("url"));
     }
 }
