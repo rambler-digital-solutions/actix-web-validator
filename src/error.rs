@@ -103,6 +103,7 @@ fn format_errors(errors: &validator::ValidationErrors, indent: Option<usize>) ->
         .join("\n")
 }
 
+#[cfg(test)]
 mod test {
     use serde::{Deserialize, Serialize};
     use validator::Validate;
