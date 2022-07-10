@@ -66,18 +66,74 @@ impl From<actix_web::error::UrlencodedError> for Error {
 impl ResponseError for Error {
     fn error_response(&self) -> HttpResponse {
         HttpResponse::build(StatusCode::BAD_REQUEST).body(match self {
-            Self::Validate(e) => format!(
-                "Validation errors in fields:\n{}",
-                e.field_errors()
-                    .iter()
-                    .map(|(field, err)| {
-                        let error = err.first().map(|err| format!("{}", err.code));
-                        format!("\t{}: {}", field, error.unwrap_or_default())
-                    })
-                    .collect::<Vec<_>>()
-                    .join("\n")
-            ),
+            Self::Validate(e) => {
+                format!("Validation errors in fields:\n{}", format_errors(e, None))
+            }
+
             _ => format!("{}", *self),
         })
+    }
+}
+
+#[inline(always)]
+fn format_errors(errors: &validator::ValidationErrors, indent: Option<usize>) -> String {
+    let indent = indent.unwrap_or(1);
+    errors
+        .errors()
+        .iter()
+        .filter_map(|(field, err)| match err {
+            validator::ValidationErrorsKind::Field(errors) => {
+                let error = errors.first().map(|err| format!("{}", err.code));
+                Some(format!(
+                    "{}{}: {}",
+                    "\t".repeat(indent),
+                    field,
+                    error.unwrap_or_default()
+                ))
+            }
+            validator::ValidationErrorsKind::Struct(errors) => Some(format!(
+                "{}{}:\n{}",
+                "\t".repeat(indent),
+                field,
+                format_errors(errors, Some(indent + 1))
+            )),
+            _ => None,
+        })
+        .collect::<Vec<_>>()
+        .join("\n")
+}
+
+mod test {
+    use serde::{Deserialize, Serialize};
+    use validator::Validate;
+
+    #[derive(Serialize, Deserialize, Validate, Debug)]
+    #[serde(rename_all = "camelCase")]
+    pub struct SearchParams {
+        #[validate]
+        page_params: PageParams,
+        #[validate(url)]
+        redirect_results: String,
+    }
+
+    #[derive(Serialize, Deserialize, Validate, Debug)]
+    #[serde(rename_all = "camelCase")]
+    pub struct PageParams {
+        #[validate(range(min = 1))]
+        page: u16,
+        #[validate(range(min = 1, max = 100))]
+        page_size: u8,
+    }
+
+    #[test]
+    fn test_format_error() {
+        let params = serde_json::from_str::<SearchParams>(
+            "{\"pageParams\":{\"page\":0,\"pageSize\":101},\"redirectResults\":\"invalid url\"}",
+        )
+        .map_err(crate::Error::from)
+        .expect("invalid json");
+        let validation = params.validate();
+        let msg = crate::error::format_errors(&validation.unwrap_err(), None);
+        assert_eq!(msg, "\tpage_params:\n\t\tpage_size: range\n\t\tpage: range\n\tredirect_results: url");
     }
 }
