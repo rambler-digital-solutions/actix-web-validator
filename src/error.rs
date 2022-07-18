@@ -48,8 +48,7 @@ impl ResponseError for Error {
                     "Validation errors in fields:\n{}",
                     flatten_errors(e)
                         .iter()
-                        .map(|(_, field, err)| { 
-                            format!("\t{}: {}", field, err) })
+                        .map(|(_, field, err)| { format!("\t{}: {}", field, err) })
                         .collect::<Vec<_>>()
                         .join("\n")
                 )
