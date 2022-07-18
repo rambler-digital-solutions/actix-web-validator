@@ -64,12 +64,10 @@ fn test_flatten_error() {
     .map_err(crate::Error::from)
     .expect("invalid json");
     let validation = params.validate().unwrap_err();
-    // &cast!(&validation.errors().get("page_params").unwrap(), ValidationErrorsKind::Struct).field_errors().get("page_size").unwrap()[0]);
     let errors = actix_web_validator::error::flatten_errors(&validation);
     assert_eq!(
         (
             &1u16,
-            // &validation.field_errors().get("page_size").unwrap()[0]
             &cast!(
                 &validation.errors().get("page_params").unwrap(),
                 ValidationErrorsKind::Struct
