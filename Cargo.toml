@@ -14,7 +14,6 @@ documentation = "https://docs.rs/actix-web-validator/"
 [dependencies]
 actix-web = { version = "4.0", default-features = false }
 actix-http = { version = "3.0" }
-derive_more = "0.99"
 validator = { version = "0.15" }
 serde = "1"
 serde_urlencoded = "0.7"
@@ -26,6 +25,7 @@ mime = "0.3"
 bytes = "1.1"
 actix-router = "0.5"
 futures-util = "0.3"
+thiserror = "1.0.31"
 
 [dev-dependencies]
 actix-web = { version = "4.0", default-features = false, features = ["macros"] }

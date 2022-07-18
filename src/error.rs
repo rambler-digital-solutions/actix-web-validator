@@ -1,29 +1,30 @@
 //! Error declaration.
 use actix_web::http::StatusCode;
 use actix_web::{HttpResponse, ResponseError};
-use derive_more::Display;
+use thiserror::Error;
+use validator::{ValidationError, ValidationErrors, ValidationErrorsKind};
 
-#[derive(Display, Debug)]
+#[derive(Error, Debug)]
 pub enum Error {
-    #[display(fmt = "Validation error: {}", _0)]
-    Validate(validator::ValidationErrors),
-    #[display(fmt = "{}", _0)]
-    Deserialize(DeserializeErrors),
-    #[display(fmt = "Payload error: {}", _0)]
-    JsonPayloadError(actix_web::error::JsonPayloadError),
-    #[display(fmt = "Url encoded error: {}", _0)]
-    UrlEncodedError(actix_web::error::UrlencodedError),
-    #[display(fmt = "Query error: {}", _0)]
-    QsError(serde_qs::Error),
+    #[error("Validation error: {0}")]
+    Validate(#[from] validator::ValidationErrors),
+    #[error(transparent)]
+    Deserialize(#[from] DeserializeErrors),
+    #[error("Payload error: {0}")]
+    JsonPayloadError(#[from] actix_web::error::JsonPayloadError),
+    #[error("Url encoded error: {0}")]
+    UrlEncodedError(#[from] actix_web::error::UrlencodedError),
+    #[error("Query error: {0}")]
+    QsError(#[from] serde_qs::Error),
 }
 
-#[derive(Display, Debug)]
+#[derive(Error, Debug)]
 pub enum DeserializeErrors {
-    #[display(fmt = "Query deserialize error: {}", _0)]
+    #[error("Query deserialize error: {0}")]
     DeserializeQuery(serde_urlencoded::de::Error),
-    #[display(fmt = "Json deserialize error: {}", _0)]
+    #[error("Json deserialize error: {0}")]
     DeserializeJson(serde_json::error::Error),
-    #[display(fmt = "Path deserialize error: {}", _0)]
+    #[error("Path deserialize error: {0}")]
     DeserializePath(serde::de::value::Error),
 }
 
@@ -33,51 +34,71 @@ impl From<serde_json::error::Error> for Error {
     }
 }
 
-impl From<serde_qs::Error> for Error {
-    fn from(error: serde_qs::Error) -> Self {
-        Error::QsError(error)
-    }
-}
-
 impl From<serde_urlencoded::de::Error> for Error {
     fn from(error: serde_urlencoded::de::Error) -> Self {
         Error::Deserialize(DeserializeErrors::DeserializeQuery(error))
     }
 }
 
-impl From<actix_web::error::JsonPayloadError> for Error {
-    fn from(error: actix_web::error::JsonPayloadError) -> Self {
-        Error::JsonPayloadError(error)
-    }
-}
-
-impl From<validator::ValidationErrors> for Error {
-    fn from(error: validator::ValidationErrors) -> Self {
-        Error::Validate(error)
-    }
-}
-
-impl From<actix_web::error::UrlencodedError> for Error {
-    fn from(error: actix_web::error::UrlencodedError) -> Self {
-        Error::UrlEncodedError(error)
-    }
-}
-
 impl ResponseError for Error {
     fn error_response(&self) -> HttpResponse {
         HttpResponse::build(StatusCode::BAD_REQUEST).body(match self {
-            Self::Validate(e) => format!(
-                "Validation errors in fields:\n{}",
-                e.field_errors()
-                    .iter()
-                    .map(|(field, err)| {
-                        let error = err.first().map(|err| format!("{}", err.code));
-                        format!("\t{}: {}", field, error.unwrap_or_default())
-                    })
-                    .collect::<Vec<_>>()
-                    .join("\n")
-            ),
+            Self::Validate(e) => {
+                format!(
+                    "Validation errors in fields:\n{}",
+                    flatten_errors(e)
+                        .iter()
+                        .map(|(_, field, err)| { format!("\t{}: {}", field, err) })
+                        .collect::<Vec<_>>()
+                        .join("\n")
+                )
+            }
             _ => format!("{}", *self),
         })
     }
+}
+
+/// Helper function for error extraction and formatting.
+/// Return Vec of tuples where first element is full field path (separated by dot)
+/// and second is error.
+#[inline]
+pub fn flatten_errors(errors: &ValidationErrors) -> Vec<(u16, String, &ValidationError)> {
+    _flatten_errors(errors, None, None)
+}
+
+#[inline]
+fn _flatten_errors(
+    errors: &ValidationErrors,
+    path: Option<String>,
+    indent: Option<u16>,
+) -> Vec<(u16, String, &ValidationError)> {
+    errors
+        .errors()
+        .iter()
+        .map(|(&field, err)| {
+            let indent = indent.unwrap_or(0);
+            let actual_path = path
+                .as_ref()
+                .map(|path| [path.as_str(), field].join("."))
+                .unwrap_or_else(|| field.to_owned());
+            match err {
+                ValidationErrorsKind::Field(field_errors) => field_errors
+                    .iter()
+                    .map(|error| (indent, actual_path.clone(), error))
+                    .collect::<Vec<_>>(),
+                ValidationErrorsKind::List(list_error) => list_error
+                    .iter()
+                    .map(|(index, errors)| {
+                        let actual_path = format!("{}[{}]", actual_path.as_str(), index);
+                        _flatten_errors(errors, Some(actual_path), Some(indent + 1))
+                    })
+                    .flatten()
+                    .collect::<Vec<_>>(),
+                ValidationErrorsKind::Struct(struct_errors) => {
+                    _flatten_errors(struct_errors, Some(actual_path), Some(indent + 1))
+                }
+            }
+        })
+        .flatten()
+        .collect::<Vec<_>>()
 }
