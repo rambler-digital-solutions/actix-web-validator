@@ -37,7 +37,7 @@ serde = { version = "1", features = ["derive"] }
 * For actix-web-validator `0.*` supported version of actix-web is `1.*`
 * For actix-web-validator `1.* ` supported version of actix-web is `2.*`
 * For actix-web-validator `2.* ` supported version of actix-web is `3.*`
-* For actix-web-validator `3.* ` supported version of actix-web is `4.*`
+* For actix-web-validator `3.*+ ` supported version of actix-web is `4.*`
 
 ### Example:
 
