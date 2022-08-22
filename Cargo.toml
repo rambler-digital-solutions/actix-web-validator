@@ -12,23 +12,23 @@ repository = "https://github.com/rambler-digital-solutions/actix-web-validator"
 documentation = "https://docs.rs/actix-web-validator/"
 
 [dependencies]
-actix-web = { version = "4.0", default-features = false }
-actix-http = { version = "3.0" }
-validator = { version = "0.15" }
+actix-web = { version = "4", default-features = false }
+actix-http = { version = "3" }
+validator = { version = "0.16" }
 serde = "1"
 serde_urlencoded = "0.7"
 serde_json = "1"
-serde_qs = { version = "0.9", features = ["actix4"] }
+serde_qs = { version = "0.10", features = ["actix4"] }
 log = "0.4"
 futures = "0.3"
 mime = "0.3"
-bytes = "1.1"
+bytes = "1"
 actix-router = "0.5"
 futures-util = "0.3"
-thiserror = "1.0.31"
+thiserror = "1.0"
 
 [dev-dependencies]
-actix-web = { version = "4.0", default-features = false, features = ["macros"] }
-validator = { version = "0.15", features = ["derive"]}
+actix-web = { version = "4", default-features = false, features = ["macros"] }
+validator = { version = "0.16", features = ["derive"]}
 serde = { version = "1", features = ["derive"] }
 actix-service = "2"
