@@ -10,6 +10,8 @@ use serde::de;
 use serde_qs::Config as QsConfig;
 use validator::Validate;
 
+type ErrHandler = Arc<dyn Fn(Error, &HttpRequest) -> actix_web::Error + Send + Sync>;
+
 /// Query extractor configuration (serde_qs based).
 ///
 /// ```rust
@@ -41,10 +43,9 @@ use validator::Validate;
 ///     );
 /// }
 /// ```
-
 #[derive(Default)]
 pub struct QsQueryConfig {
-    ehandler: Option<Arc<dyn Fn(Error, &HttpRequest) -> actix_web::Error + Send + Sync>>,
+    ehandler: Option<ErrHandler>,
     qs_config: QsConfig,
 }
 

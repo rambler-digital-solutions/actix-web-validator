@@ -75,7 +75,7 @@ fn _flatten_errors(
     errors
         .errors()
         .iter()
-        .map(|(&field, err)| {
+        .flat_map(|(&field, err)| {
             let indent = indent.unwrap_or(0);
             let actual_path = path
                 .as_ref()
@@ -88,17 +88,15 @@ fn _flatten_errors(
                     .collect::<Vec<_>>(),
                 ValidationErrorsKind::List(list_error) => list_error
                     .iter()
-                    .map(|(index, errors)| {
+                    .flat_map(|(index, errors)| {
                         let actual_path = format!("{}[{}]", actual_path.as_str(), index);
                         _flatten_errors(errors, Some(actual_path), Some(indent + 1))
                     })
-                    .flatten()
                     .collect::<Vec<_>>(),
                 ValidationErrorsKind::Struct(struct_errors) => {
                     _flatten_errors(struct_errors, Some(actual_path), Some(indent + 1))
                 }
             }
         })
-        .flatten()
         .collect::<Vec<_>>()
 }

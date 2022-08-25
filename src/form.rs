@@ -134,6 +134,8 @@ where
     }
 }
 
+type ErrHandler = Rc<dyn Fn(Error, &HttpRequest) -> actix_web::Error>;
+
 /// Form extractor configuration
 ///
 /// ```rust
@@ -169,7 +171,7 @@ where
 #[derive(Clone)]
 pub struct FormConfig {
     limit: usize,
-    ehandler: Option<Rc<dyn Fn(Error, &HttpRequest) -> actix_web::Error>>,
+    ehandler: Option<ErrHandler>,
 }
 
 impl FormConfig {

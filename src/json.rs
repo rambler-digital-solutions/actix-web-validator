@@ -151,6 +151,8 @@ where
     }
 }
 
+type ErrHandler = Arc<dyn Fn(Error, &HttpRequest) -> actix_web::Error + Send + Sync>;
+
 /// Json extractor configuration
 ///
 /// ```rust
@@ -188,7 +190,7 @@ where
 #[derive(Clone)]
 pub struct JsonConfig {
     limit: usize,
-    ehandler: Option<Arc<dyn Fn(Error, &HttpRequest) -> actix_web::Error + Send + Sync>>,
+    ehandler: Option<ErrHandler>,
     content_type: Option<Arc<dyn Fn(mime::Mime) -> bool + Send + Sync>>,
 }
 

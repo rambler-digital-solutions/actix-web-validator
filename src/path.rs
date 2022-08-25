@@ -151,6 +151,8 @@ where
     }
 }
 
+type ErrHandler = Arc<dyn Fn(Error, &HttpRequest) -> actix_web::Error + Send + Sync>;
+
 /// Path extractor configuration
 ///
 /// ```rust
@@ -195,7 +197,7 @@ where
 /// ```
 #[derive(Clone, Default)]
 pub struct PathConfig {
-    ehandler: Option<Arc<dyn Fn(Error, &HttpRequest) -> actix_web::Error + Send + Sync>>,
+    ehandler: Option<ErrHandler>,
 }
 
 impl PathConfig {

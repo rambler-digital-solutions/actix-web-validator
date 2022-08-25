@@ -9,6 +9,8 @@ use futures::future::{err, ok, Ready};
 use serde::de;
 use validator::Validate;
 
+type ErrHandler = Arc<dyn Fn(Error, &HttpRequest) -> actix_web::Error + Send + Sync>;
+
 /// Query extractor configuration.
 ///
 /// ## Example
@@ -44,7 +46,7 @@ use validator::Validate;
 /// ```
 #[derive(Clone, Default)]
 pub struct QueryConfig {
-    pub ehandler: Option<Arc<dyn Fn(Error, &HttpRequest) -> actix_web::Error + Send + Sync>>,
+    pub ehandler: Option<ErrHandler>,
 }
 
 impl QueryConfig {
