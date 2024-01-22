@@ -8,10 +8,9 @@
 [coveralls]: https://coveralls.io/github/rambler-digital-solutions/actix-web-validator?branch=master
 [Build Status]: https://travis-ci.org/rambler-digital-solutions/actix-web-validator.svg?branch=master
 [travis]: https://travis-ci.org/rambler-digital-solutions/actix-web-validator
+[Validator crate]: https://crates.io/crates/validator
 
-
-This crate is a Rust library for providing validation mechanism to actix-web with Validator crate
-
+This crate is a Rust library for providing validation mechanism to actix-web with [Validator crate].
 
 Installation
 ============
