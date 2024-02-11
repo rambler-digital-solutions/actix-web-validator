@@ -11,14 +11,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Update README
 
 ## [5.0.0] 2022-08-25
-### Chaged
+### Changed
 - [#37](https://github.com/rambler-digital-solutions/actix-web-validator/pull/37): Update validator dependency to 0.16
 
 ## [4.0.0] 2022-07-18
 ### Added
 - [#36](https://github.com/rambler-digital-solutions/actix-web-validator/pull/36): Support for nested errors in default output
 
-### Chaged
+### Changed
 - [#34](https://github.com/rambler-digital-solutions/actix-web-validator/pull/34): Update validator dependency to 0.15
 
 ## [3.0.0] 2022-03-15
@@ -64,14 +64,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [#13](https://github.com/rambler-digital-solutions/actix-web-validator/issues/13): Add actix-web 3.x.x support.
 
 ### Deprecated
-- `ValidatedJson`, `ValidatedQuery` and `ValidatedPath` are depricated in favor of same names from actix (`Json`, `Query` and `Path`).
+- `ValidatedJson`, `ValidatedQuery` and `ValidatedPath` are deprecated in favor of same names from actix (`Json`, `Query` and `Path`).
 
 ## [1.0.0] 2020-06-06
 - [#11](https://github.com/rambler-digital-solutions/actix-web-validator/issues/11): Add actix-web 2.0.0 support.
 
 ## [0.2.1] 2020-06-05
 ### Added
-- Add documnetation link and Readme into crates.io page.
+- Add documentation link and Readme into crates.io page.
 
 ## [0.2.0] 2020-06-05
 ### Added
