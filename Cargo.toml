@@ -1,10 +1,20 @@
 [package]
 name = "actix-web-validator"
 version = "5.0.1"
-authors = ["Belousow Makc <lib.bmw@gmail.com>", "Andrey Ermilov <andrerm@ya.ru>", "Kolomatskiy Artem <kolomatskiy@bk.ru>"]
+authors = [
+    "Belousow Makc <lib.bmw@gmail.com>",
+    "Andrey Ermilov <andrerm@ya.ru>",
+    "Kolomatskiy Artem <kolomatskiy@bk.ru>",
+]
 edition = "2021"
 description = "Validation mechanism for actix-web"
-keywords = ["actix-web", "serialization", "querystring", "validator", "validation"]
+keywords = [
+    "actix-web",
+    "serialization",
+    "querystring",
+    "validator",
+    "validation",
+]
 categories = ["encoding", "web-programming"]
 license = "MIT"
 readme = "README.md"
@@ -14,7 +24,7 @@ documentation = "https://docs.rs/actix-web-validator/"
 [dependencies]
 actix-web = { version = "4", default-features = false }
 actix-http = { version = "3" }
-validator = { version = "0.16" }
+validator = { version = "0.18" }
 serde = "1"
 serde_urlencoded = "0.7"
 serde_json = "1"
@@ -29,6 +39,6 @@ thiserror = "1.0"
 
 [dev-dependencies]
 actix-web = { version = "4", default-features = false, features = ["macros"] }
-validator = { version = "0.16", features = ["derive"]}
+validator = { version = "0.18", features = ["derive"] }
 serde = { version = "1", features = ["derive"] }
 actix-service = "2"
