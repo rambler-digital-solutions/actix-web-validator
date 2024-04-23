@@ -1,11 +1,7 @@
 [package]
-name = "actix-web-validator"
-version = "5.0.1"
-authors = [
-    "Belousow Makc <lib.bmw@gmail.com>",
-    "Andrey Ermilov <andrerm@ya.ru>",
-    "Kolomatskiy Artem <kolomatskiy@bk.ru>",
-]
+name = "actix-web-validator5"
+version = "1.0.0"
+authors = ["keesh.zhang<chunhui2001@gmail.com>"]
 edition = "2021"
 description = "Validation mechanism for actix-web"
 keywords = [
@@ -18,8 +14,8 @@ keywords = [
 categories = ["encoding", "web-programming"]
 license = "MIT"
 readme = "README.md"
-repository = "https://github.com/rambler-digital-solutions/actix-web-validator"
-documentation = "https://docs.rs/actix-web-validator/"
+repository = "https://github.com/chunhui2001/actix-web-validator"
+documentation = "https://docs.rs/actix-web-validator5"
 
 [dependencies]
 actix-web = { version = "4", default-features = false }
