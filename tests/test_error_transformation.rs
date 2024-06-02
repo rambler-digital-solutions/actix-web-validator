@@ -31,7 +31,7 @@ fn test_serde_json_error_transformation() {
 #[derive(Serialize, Deserialize, Validate, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct SearchParams {
-    #[validate]
+    #[validate(nested)]
     page_params: PageParams,
     #[validate(url)]
     redirect_results: String,
