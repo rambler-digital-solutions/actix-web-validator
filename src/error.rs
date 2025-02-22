@@ -75,12 +75,12 @@ fn _flatten_errors(
     errors
         .errors()
         .iter()
-        .flat_map(|(&field, err)| {
+        .flat_map(|(field, err)| {
             let indent = indent.unwrap_or(0);
             let actual_path = path
                 .as_ref()
                 .map(|path| [path.as_str(), field].join("."))
-                .unwrap_or_else(|| field.to_owned());
+                .unwrap_or_else(|| field.to_string());
             match err {
                 ValidationErrorsKind::Field(field_errors) => field_errors
                     .iter()
