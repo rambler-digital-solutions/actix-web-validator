@@ -34,12 +34,52 @@ async fn test_json_validation() {
     let resp = call_service(&mut app, req).await;
     assert_eq!(resp.status(), StatusCode::OK);
 
+    let req = test::TestRequest::post()
+        .uri("/test")
+        .set_json(&JsonPayload {
+            page_url: "https://my_page.com".to_owned(),
+            age: 18,
+        })
+        .to_request();
+    let resp = call_service(&mut app, req).await;
+    assert_eq!(resp.status(), StatusCode::OK);
+
+    let req = test::TestRequest::post()
+        .uri("/test")
+        .set_json(&JsonPayload {
+            page_url: "https://my_page.com".to_owned(),
+            age: 28,
+        })
+        .to_request();
+    let resp = call_service(&mut app, req).await;
+    assert_eq!(resp.status(), StatusCode::OK);
+
     // Test 400 status
     let req = test::TestRequest::post()
         .uri("/test")
         .set_json(&JsonPayload {
             page_url: "invalid_url".to_owned(),
             age: 24,
+        })
+        .to_request();
+    let resp = call_service(&mut app, req).await;
+    assert_eq!(resp.status(), StatusCode::BAD_REQUEST);
+
+    let req = test::TestRequest::post()
+        .uri("/test")
+        .set_json(&JsonPayload {
+            page_url: "https://my_page.com".to_owned(),
+            age: 17,
+        })
+        .to_request();
+    let resp = call_service(&mut app, req).await;
+    assert_eq!(resp.status(), StatusCode::BAD_REQUEST);
+
+    let req = test::TestRequest::post()
+        .uri("/test")
+        .set_json(&JsonPayload {
+            page_url: "https://my_page.com".to_owned(),
+            age: 29,
         })
         .to_request();
     let resp = call_service(&mut app, req).await;
