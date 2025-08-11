@@ -20,8 +20,8 @@ This crate works with Cargo and can be found on
 
 ```toml
 [dependencies]
-actix-web-validator = "6.0.0"
-validator = { version = "0.16", features = ["derive"] }
+actix-web-validator = "7.0.0"
+validator = { version = "0.20", features = ["derive"] }
 serde = { version = "1", features = ["derive"] }
 ```
 
