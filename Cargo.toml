@@ -18,7 +18,7 @@ validator = { version = "0.20" }
 serde = "1"
 serde_urlencoded = "0.7"
 serde_json = "1"
-serde_qs = { version = "0.13", features = ["actix4"] }
+serde_qs = { version = "0.15", features = ["actix4"] }
 log = "0.4"
 futures = "0.3"
 mime = "0.3"
